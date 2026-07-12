@@ -1,0 +1,4 @@
+project_id = "advctswaclrnrxpxiglw"
+
+[functions.mercari-price]
+verify_jwt = false
