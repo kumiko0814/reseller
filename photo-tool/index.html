@@ -660,17 +660,27 @@
         </div>
         <div class="label-section-body" id="label-body">
           <div class="label-hint">
-            入れたい文字を書くだけ。<b>商品は自動で右に寄り、文字は左上・背景は透明</b>で仕上がります。<br>
-            何も入れずに白抜きだけ保存したい方は、下の「文字を入れずに保存」からどうぞ。
+            入れたい文字を書くだけ。<b>商品は自動で右に寄り、背景は透明</b>で仕上がります。<br>
+            <b>文字の大きさはスライダー、位置はプレビューの文字を指でドラッグ</b>して自由に調整できます☺
           </div>
 
           <div class="label-field">
             <label>入れたい文字（改行で複数行OK）</label>
-            <textarea id="lbl-text" rows="3" placeholder="例：美品　ZARA&#10;お値下げ中です♡"></textarea>
+            <textarea id="lbl-text" rows="3" placeholder="例：美品　ZARA&#10;お値下げ中です♡" oninput="updateLabelPreview()"></textarea>
+          </div>
+
+          <div class="label-field">
+            <label>文字の大きさ</label>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:11px;color:var(--sub);">小</span>
+              <input type="range" id="lbl-size" min="0.5" max="2.2" value="1" step="0.05" style="flex:1;" oninput="onLabelSize(this.value)">
+              <span style="font-size:11px;color:var(--sub);">大</span>
+            </div>
           </div>
 
           <div class="label-preview-wrap" id="label-preview-wrap" style="display:none;">
-            <canvas id="label-canvas"></canvas>
+            <canvas id="label-canvas" style="touch-action:none;cursor:grab;max-width:100%;"></canvas>
+            <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:6px;">↑ 文字を指でドラッグして位置を調整</div>
           </div>
 
           <div class="label-btn-row">
@@ -726,6 +736,9 @@
 
   let selectedFile = null;
   let resultBlob = null;
+  // 文字入れ：商品を右に置いた透過キャンバス(文字なし)をキャッシュ／文字の大きさ・位置(比率)／ドラッグ判定用の文字矩形
+  let baseComposed = null;
+  let labelFontScale = 1, labelPosX = 0.045, labelPosY = 0.05, lastTextRect = null;
 
   zone.addEventListener('click', () => input.click());
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
@@ -855,6 +868,7 @@
       setProgress(95, '仕上げ処理中...', 'もうすぐ完了します');
 
       resultBlob = resultBlobData;
+      baseComposed = null;   // 新しい結果になったら商品配置キャッシュを作り直す
       localStorage.setItem('photo_models_cached', 'true');
 
       // Before/After 表示
@@ -922,6 +936,9 @@
   window.resetAll = function() {
     selectedFile = null;
     resultBlob = null;
+    baseComposed = null;
+    labelFontScale = 1; labelPosX = 0.045; labelPosY = 0.05; lastTextRect = null;
+    const _sz = document.getElementById('lbl-size'); if (_sz) _sz.value = '1';
     input.value = '';
     previewImg.src = '';
     previewImg.style.display = 'none';
@@ -1162,65 +1179,56 @@
   }
 
   // 左上に文字を描く（背景は透過のまま。読みやすさのため白いふちどりを付ける）
-  function drawTextTopLeft(ctx, w, h, lines) {
-    if (!lines || !lines.length) return;
-    const fs = Math.max(w * 0.052, 30);          // 文字サイズ
-    const lh = fs * 1.32;                          // 行間
-    const marginX = w * 0.045;
-    let y = h * 0.05 + fs;
+  // 文字を描く（大きさ=labelFontScale、位置=labelPosX/Y の比率、左上基準）。ドラッグ判定用に矩形を記録
+  function drawText(ctx, w, h, lines) {
+    if (!lines || !lines.length) { lastTextRect = null; return; }
+    const fs = Math.max(w * 0.052, 30) * labelFontScale;
+    const lh = fs * 1.32;
+    const left = labelPosX * w;
+    const top = labelPosY * h;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.font = `bold ${fs}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
     ctx.lineJoin = 'round';
+    let maxW = 0;
+    let y = top + fs;
     for (let i = 0; i < lines.length; i++) {
-      // 白いふちどり（透過背景でも読める）
-      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      maxW = Math.max(maxW, ctx.measureText(lines[i]).width);
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';   // 白フチで透過背景でも読める
       ctx.lineWidth = Math.max(fs * 0.18, 4);
-      ctx.strokeText(lines[i], marginX, y);
-      // 本体（ネイビー）
-      ctx.fillStyle = '#26405f';
-      ctx.fillText(lines[i], marginX, y);
+      ctx.strokeText(lines[i], left, y);
+      ctx.fillStyle = '#26405f';                     // ネイビー本体
+      ctx.fillText(lines[i], left, y);
       y += lh;
     }
+    lastTextRect = { x: left, y: top, w: maxW, h: lh * lines.length };
   }
 
-  async function buildLabeledCanvas() {
-    if (!resultBlob) return null;
-    const labels = getLabelValues();
-
+  // 商品を右に置いた透過キャンバス(文字なし)を1回だけ作ってキャッシュ（ドラッグを軽くするため）
+  function buildBaseComposed() {
+    if (baseComposed) return Promise.resolve(baseComposed);
     return new Promise((resolve, reject) => {
+      if (!resultBlob) { resolve(null); return; }
       const img = new Image();
       const url = URL.createObjectURL(resultBlob);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        // 元の透過PNGを一旦Canvasへ
         const src = document.createElement('canvas');
-        src.width = img.naturalWidth;
-        src.height = img.naturalHeight;
+        src.width = img.naturalWidth; src.height = img.naturalHeight;
         src.getContext('2d').drawImage(img, 0, 0);
-
         const W = img.naturalWidth, H = img.naturalHeight;
         const out = document.createElement('canvas');
-        out.width = W; out.height = H;               // 背景は塗らない＝透過のまま
+        out.width = W; out.height = H;                 // 背景は塗らない＝透過
         const octx = out.getContext('2d');
-
-        // 商品を「右側」に配置。文字がある時は右60%、無い時は中央寄せで少しだけ右。
         const bbox = getAlphaBBox(src);
-        const hasText = labels.lines && labels.lines.length > 0;
-        const regionRightRatio = hasText ? 0.60 : 0.94; // 商品を収める右側領域の幅割合
-        const regionW = W * regionRightRatio;
-        const regionH = H * 0.90;
+        const regionW = W * 0.60, regionH = H * 0.90;  // 商品は右側60%領域に収める
         const scale = Math.min(regionW / bbox.w, regionH / bbox.h, 1.6);
-        const drawW = bbox.w * scale;
-        const drawH = bbox.h * scale;
+        const drawW = bbox.w * scale, drawH = bbox.h * scale;
         const marginR = W * 0.04;
-        const destX = W - drawW - marginR;                 // 右寄せ
-        const destY = (H - drawH) / 2;                     // 縦中央
+        const destX = W - drawW - marginR;             // 右寄せ
+        const destY = (H - drawH) / 2;                 // 縦中央
         octx.drawImage(src, bbox.x, bbox.y, bbox.w, bbox.h, destX, destY, drawW, drawH);
-
-        // 文字を左上に
-        if (hasText) drawTextTopLeft(octx, W, H, labels.lines);
-
+        baseComposed = out;
         resolve(out);
       };
       img.onerror = reject;
@@ -1228,24 +1236,89 @@
     });
   }
 
+  // baseComposed(商品) + 文字 を新しい透過キャンバスに合成して返す
+  function composeLabeled() {
+    const W = baseComposed.width, H = baseComposed.height;
+    const out = document.createElement('canvas');
+    out.width = W; out.height = H;
+    const octx = out.getContext('2d');
+    octx.drawImage(baseComposed, 0, 0);
+    const labels = getLabelValues();
+    drawText(octx, W, H, labels.lines);
+    return out;
+  }
+
+  // プレビュー描画（透過が分かるようチェッカー柄を敷く＝保存物には影響しない）＋ドラッグ有効化
+  function renderPreview() {
+    if (!baseComposed) return;
+    const composed = composeLabeled();
+    const pc = document.getElementById('label-canvas');
+    pc.width = composed.width; pc.height = composed.height;
+    const ctx = pc.getContext('2d');
+    const cs = Math.max(10, Math.round(composed.width / 40));
+    for (let y = 0; y < pc.height; y += cs) {
+      for (let x = 0; x < pc.width; x += cs) {
+        ctx.fillStyle = ((((x / cs) | 0) + ((y / cs) | 0)) % 2) ? '#eceaf1' : '#ffffff';
+        ctx.fillRect(x, y, cs, cs);
+      }
+    }
+    ctx.drawImage(composed, 0, 0);
+    document.getElementById('label-preview-wrap').style.display = 'flex';
+    attachLabelDrag(pc);
+  }
+
+  // プレビュー上で文字を指/マウスでドラッグして位置調整
+  function attachLabelDrag(canvas) {
+    if (canvas._dragBound) return;
+    canvas._dragBound = true;
+    let dragging = false, grabDX = 0, grabDY = 0;
+    const toImg = (e) => {
+      const r = canvas.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
+    };
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!lastTextRect) return;
+      const p = toImg(e);
+      const pad = Math.max(lastTextRect.h * 0.4, 20);
+      if (p.x >= lastTextRect.x - pad && p.x <= lastTextRect.x + lastTextRect.w + pad &&
+          p.y >= lastTextRect.y - pad && p.y <= lastTextRect.y + lastTextRect.h + pad) {
+        dragging = true;
+        grabDX = p.x - lastTextRect.x; grabDY = p.y - lastTextRect.y;
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        canvas.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const p = toImg(e);
+      labelPosX = Math.min(Math.max((p.x - grabDX) / canvas.width, 0), 0.98);
+      labelPosY = Math.min(Math.max((p.y - grabDY) / canvas.height, 0), 0.98);
+      renderPreview();
+    });
+    const end = () => { if (dragging) { dragging = false; canvas.style.cursor = 'grab'; } };
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+  }
+
+  window.onLabelSize = function(v) {
+    labelFontScale = parseFloat(v) || 1;
+    if (baseComposed) renderPreview();
+  };
+
   window.updateLabelPreview = async function() {
     if (!resultBlob) return;
-    const canvas = await buildLabeledCanvas();
-    if (!canvas) return;
-
-    const previewCanvas = document.getElementById('label-canvas');
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
-    const ctx = previewCanvas.getContext('2d');
-    ctx.drawImage(canvas, 0, 0);
-
-    document.getElementById('label-preview-wrap').style.display = 'flex';
+    await buildBaseComposed();
+    if (!baseComposed) return;
+    renderPreview();
   };
 
   window.downloadWithLabel = async function() {
     if (!resultBlob) return;
-    const canvas = await buildLabeledCanvas();
-    if (!canvas) return;
+    await buildBaseComposed();
+    if (!baseComposed) return;
+    const canvas = composeLabeled();
 
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
