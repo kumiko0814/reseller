@@ -2610,8 +2610,12 @@ function genToWizard(){
 
 /* ============ photo tool ============ */
 function openPhotoTool(){
-  // 実在パス（seller-tool から見た相対）
-  window.open("photo-tool/","_blank");
+  // ★絶対URLで「このツール自身のフォルダ/photo-tool/」を確実に指す。
+  //   相対 "photo-tool/" だと、末尾スラッシュ無しのURL(例 /reseller?ch=1)で開かれた時に
+  //   サイト直下 /photo-tool/ に化けて404になるため（くみこのiPhoneで発生）。
+  var p = location.pathname.replace(/[^/]*\.[^/]*$/, ""); // index.html等のファイル名を除去
+  if(!/\/$/.test(p)) p += "/";                             // 末尾スラッシュを保証（/reseller → /reseller/）
+  window.open(location.origin + p + "photo-tool/", "_blank");
 }
 
 /* ============ 出品ウィザード ============ */
