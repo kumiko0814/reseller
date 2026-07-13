@@ -817,6 +817,23 @@
   .chConf{position:absolute;top:0;width:8px;height:12px;border-radius:2px;opacity:.9;pointer-events:none;
     animation:chFall 1.1s ease-in forwards;z-index:5;}
   @keyframes chFall{0%{transform:translateY(-6px) rotate(0);opacity:1;}100%{transform:translateY(120px) rotate(220deg);opacity:0;}}
+  .chPre{background:#f2f7fb;border:1px solid #dcebf6;border-radius:11px;padding:9px 11px;font-size:11.5px;font-weight:800;color:#5f97be;line-height:1.5;margin-bottom:10px;}
+  /* ===== 8バッジ・コレクション（リアタイ4＋課題4） ===== */
+  .chBadges{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px 14px 16px;box-shadow:0 8px 24px rgba(189,120,134,.10);}
+  .chBadgesHd{font-weight:900;color:var(--navy);font-size:14px;margin-bottom:12px;text-align:center;}
+  .chBadgesHd b{color:var(--pinkd);font-size:16px;}
+  .chBgRow{margin-bottom:11px;}
+  .chBgRow:last-child{margin-bottom:0;}
+  .chBgRowT{font-size:11px;font-weight:900;color:var(--sub);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+  .chBgRowT::before{content:"";width:14px;height:14px;border-radius:50%;background:linear-gradient(90deg,#C99BE8,#8FC0EC);}
+  .chBgRow.sub .chBgRowT::before{background:linear-gradient(90deg,#F5A6C8,#C99BE8);}
+  .chBgCells{display:flex;gap:8px;}
+  .chBg{flex:1;text-align:center;}
+  .chBgIc{width:52px;height:52px;margin:0 auto 4px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    border:2px dashed #e6cdd7;background:#faf6f8;color:#d9c3cd;font-size:20px;font-weight:900;transition:transform .3s;}
+  .chBg.on .chBgIc{border:none;background:linear-gradient(158deg,#8FC0EC,#C99BE8);color:#fff;box-shadow:0 5px 13px rgba(201,155,232,.4);transform:scale(1.04);}
+  .chBgRow.sub .chBg.on .chBgIc{background:linear-gradient(158deg,#F5A6C8,#C99BE8);}
+  .chBgL{font-size:10px;font-weight:800;color:var(--sub);}
 </style>
 </head>
 <body>
@@ -1213,7 +1230,7 @@
   <nav class="tabbar">
     <button class="on" data-p="home" onclick="go('home')">
       <img class="ic" src="assets/icons/tab1.png" alt="" width="28" height="28">
-      <span class="tl">30日プログラム</span>
+      <span class="tl">スマセル4日プログラム</span>
     </button>
     <button data-p="box" onclick="go('box')">
       <img class="ic" src="assets/icons/tab2.png" alt="" width="28" height="28">
@@ -4879,11 +4896,9 @@ function renderChallengeHero(){
     body='<div class="chDone"><div class="chDoneT">4つのスタンプ、そろいました♡</div>'+
       '<p>4日間、ほんとうにおつかれさまでした。完走はあなたが「ちゃんと動けた人」である何よりの証です。</p>'+
       '<button class="chBtn full" onclick="chComplete()">コンプリート賞にエントリーする</button></div>';
-  } else if(t < CH.days[0].date){
-    body='<div class="chDay"><div class="chDayHd"><span class="chDayN">まもなく</span><span class="chDayTh">7/15（水）よる9時、スタート</span></div>'+
-      '<p class="chLede">初日のあいことばは、当日21時のライブでお伝えします。今夜はゆっくり、たのしみに待っていてくださいね☺</p></div>';
   } else {
     var d=cur, st=chStateOf(d.n);
+    var preStart = (t < CH.days[0].date);
     var kwBlock = st.k
       ? '<div class="chStep done"><span class="chChk">✓</span> リアタイ参加ずみ（あいことば受付）</div>'
       : '<div class="chStep"><div class="chStepT">① ライブのあいことばを入れる<small>'+d.mins+'・ライブを見た人だけの合言葉</small></div>'+
@@ -4893,9 +4908,12 @@ function renderChallengeHero(){
       ? '<div class="chStep done"><span class="chChk">✓</span> オープンチャットに提出ずみ<a class="chUndo" onclick="chToggleSubmit('+d.n+')">とりけす</a></div>'
       : '<div class="chStep"><div class="chStepT">② きょうの課題を提出する<small>'+d.mission+'</small></div>'+
         '<button class="chBtn line" onclick="chToggleSubmit('+d.n+')">オープンチャットに提出した</button></div>';
+    var preNote = preStart
+      ? '<div class="chPre">この下の欄に、毎晩21時のライブで発表される「あいことば」を入れてね。スタートは7/15（水）です☺</div>'
+      : '';
     body='<div class="chDay">'+
       '<div class="chDayHd"><span class="chDayN">Day'+d.n+'</span><span class="chDayTh">'+d.theme+'</span><span class="chDayDt">'+chDateJp(d.date)+'（'+d.wday+'）21:00</span></div>'+
-      '<p class="chLede">'+d.tip+'</p>'+ kwBlock + subBlock +
+      '<p class="chLede">'+d.tip+'</p>'+ preNote + kwBlock + subBlock +
       '<div class="chGift">🎁 今日のプレゼント：<b>'+d.present+'</b>'+
         (chProlineSet()
           ? '<button class="chBtn line" style="margin-top:9px" onclick="chOpenPresent('+d.n+')">プロラインで受け取る（あいことば入力ずみで開きます）</button>'
@@ -4904,6 +4922,29 @@ function renderChallengeHero(){
     '</div>';
   }
   host.innerHTML='<div class="chWrap"><div class="chCard">'+head+body+'</div></div>';
+  renderChallengeBadges();
+}
+/* ホーム下部のバッジ欄を「リアタイ参加4＋課題提出4＝計8バッジ」のコレクションに差し替え（?ch=1のときのみ） */
+function chBadgeCells(kind){
+  var cells="";
+  CH.days.forEach(function(d){
+    var got=!!chStateOf(d.n)[kind];
+    cells+='<div class="chBg'+(got?' on':'')+'"><div class="chBgIc">'+(got?"♡":"")+'</div><div class="chBgL">Day'+d.n+'</div></div>';
+  });
+  return cells;
+}
+function renderChallengeBadges(){
+  var host=document.getElementById("homeBadges"); if(!host) return;
+  if(!CH_ON) return;
+  host.style.display="";
+  var kc=CH.days.filter(function(d){return chStateOf(d.n).k;}).length;
+  var sc=CH.days.filter(function(d){return chStateOf(d.n).s;}).length;
+  host.innerHTML=
+    '<div class="chBadges">'+
+      '<div class="chBadgesHd">あつめたバッジ <b>'+(kc+sc)+'</b> / 8</div>'+
+      '<div class="chBgRow"><div class="chBgRowT">キーワードでリアタイ参加</div><div class="chBgCells">'+chBadgeCells("k")+'</div></div>'+
+      '<div class="chBgRow sub"><div class="chBgRowT">課題を提出</div><div class="chBgCells">'+chBadgeCells("s")+'</div></div>'+
+    '</div>';
 }
 /* ★プロライン連動：自動応答リンク（例 .../reseller/?stamp=はじまり）で開くと、
    あいことばが一致する日のリアタイ・スタンプを自動点灯（手入力なし）。日付ゲートは有効。 */
