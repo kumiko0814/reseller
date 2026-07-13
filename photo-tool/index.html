@@ -369,6 +369,7 @@
     letter-spacing: 0.04em;
   }
   .label-field input,
+  .label-field textarea,
   .label-field select {
     width: 100%;
     padding: 9px 11px;
@@ -382,7 +383,9 @@
     -webkit-appearance: none;
     appearance: none;
   }
+  .label-field textarea { resize: vertical; line-height: 1.5; }
   .label-field input:focus,
+  .label-field textarea:focus,
   .label-field select:focus {
     outline: none;
     border-color: var(--blue);
@@ -615,8 +618,8 @@
         </div>
       </div>
 
-      <!-- 仕上げ調整セクション -->
-      <div class="finish-section">
+      <!-- 仕上げ調整セクション（透過を常に保つため非表示。影/明るさは白背景化するため今回は使わない） -->
+      <div class="finish-section" style="display:none;">
         <div class="finish-section-header" id="finish-header" onclick="toggleFinishSection()">
           仕上げ調整（任意）
           <span class="toggle-arrow" id="finish-arrow">▼</span>
@@ -657,55 +660,13 @@
         </div>
         <div class="label-section-body" id="label-body">
           <div class="label-hint">
-            文字は<b>入れても入れなくてもOK</b>です。入れたい場合だけ下から選んでください。<br>
+            入れたい文字を書くだけ。<b>商品は自動で右に寄り、文字は左上・背景は透明</b>で仕上がります。<br>
             何も入れずに白抜きだけ保存したい方は、下の「文字を入れずに保存」からどうぞ。
           </div>
 
-          <!-- テンプレート選択 -->
-          <div class="template-selector">
-            <label class="template-option active" id="tmpl-opt-a">
-              <input type="radio" name="tmpl" value="A" checked onchange="onTemplateChange('A')">
-              A. ブランド重視
-            </label>
-            <label class="template-option" id="tmpl-opt-b">
-              <input type="radio" name="tmpl" value="B" onchange="onTemplateChange('B')">
-              B. 価格訴求
-            </label>
-          </div>
-
-          <!-- Aモード入力欄 -->
-          <div id="fields-a">
-            <div class="label-field">
-              <label>状態</label>
-              <select id="lbl-condition">
-                <option value="">-- 選択しない --</option>
-                <option value="美品">美品</option>
-                <option value="新品">新品</option>
-                <option value="未使用">未使用</option>
-                <option value="良品">良品</option>
-                <option value="使用感あり">使用感あり</option>
-              </select>
-            </div>
-            <div class="label-field">
-              <label>ブランド名</label>
-              <input type="text" id="lbl-brand-a" placeholder="例：ZARA">
-            </div>
-            <div class="label-field">
-              <label>価格（円）</label>
-              <input type="number" id="lbl-price-a" placeholder="例：6990" min="0">
-            </div>
-          </div>
-
-          <!-- Bモード入力欄 -->
-          <div id="fields-b" style="display:none;">
-            <div class="label-field">
-              <label>価格（円）</label>
-              <input type="number" id="lbl-price-b" placeholder="例：3500" min="0">
-            </div>
-            <div class="label-field">
-              <label>ブランド名</label>
-              <input type="text" id="lbl-brand-b" placeholder="例：ZARA">
-            </div>
+          <div class="label-field">
+            <label>入れたい文字（改行で複数行OK）</label>
+            <textarea id="lbl-text" rows="3" placeholder="例：美品　ZARA&#10;お値下げ中です♡"></textarea>
           </div>
 
           <div class="label-preview-wrap" id="label-preview-wrap" style="display:none;">
@@ -970,13 +931,10 @@
     document.getElementById('step-error').style.display = 'none';
     document.getElementById('step-processing').style.display = 'none';
     // 文字入れ入力リセット
-    ['lbl-condition', 'lbl-brand-a', 'lbl-price-a', 'lbl-brand-b', 'lbl-price-b'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    document.getElementById('label-preview-wrap').style.display = 'none';
-    // テンプレートをAに戻す
-    onTemplateChange('A');
+    const _lt = document.getElementById('lbl-text');
+    if (_lt) _lt.value = '';
+    const _pw = document.getElementById('label-preview-wrap');
+    if (_pw) _pw.style.display = 'none';
     // 文字入れアコーディオンを閉じる
     const body = document.getElementById('label-body');
     const header = document.getElementById('label-header');
@@ -1164,19 +1122,29 @@
   };
 
   function getLabelValues() {
-    if (currentTemplate === 'B') {
-      return {
-        template: 'B',
-        price: document.getElementById('lbl-price-b').value.trim(),
-        brand: document.getElementById('lbl-brand-b').value.trim()
-      };
+    var el = document.getElementById('lbl-text');
+    var raw = el ? el.value : '';
+    // 改行で複数行。空行は詰める
+    var lines = raw.split(/\r?\n/).map(function(s){ return s.replace(/\s+$/,''); }).filter(function(s){ return s.trim() !== ''; });
+    return { lines: lines };
+  }
+
+  // 透過PNGの中の「商品（不透明ピクセル）」の外接矩形を求める
+  function getAlphaBBox(canvas) {
+    var w = canvas.width, h = canvas.height;
+    var d = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    var minX = w, minY = h, maxX = -1, maxY = -1;
+    var step = Math.max(1, Math.floor(Math.min(w, h) / 400)); // 大画像は間引いて高速化
+    for (var y = 0; y < h; y += step) {
+      for (var x = 0; x < w; x += step) {
+        if (d[(y * w + x) * 4 + 3] > 12) {
+          if (x < minX) minX = x; if (x > maxX) maxX = x;
+          if (y < minY) minY = y; if (y > maxY) maxY = y;
+        }
+      }
     }
-    return {
-      template: 'A',
-      condition: document.getElementById('lbl-condition').value.trim(),
-      brand: document.getElementById('lbl-brand-a').value.trim(),
-      price: document.getElementById('lbl-price-a').value.trim()
-    };
+    if (maxX < 0) return { x: 0, y: 0, w: w, h: h }; // 全透明などのフォールバック
+    return { x: minX, y: minY, w: (maxX - minX + 1), h: (maxY - minY + 1) };
   }
 
   function roundRect(ctx, x, y, w, h, r) {
@@ -1193,131 +1161,67 @@
     ctx.closePath();
   }
 
-  function drawLabelTemplateA(canvas, opts) {
-    // ブランド重視：左上にコンパクトな状態+ブランド、右下に価格
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-
-    if (opts.condition || opts.brand) {
-      const padX = w * 0.018;
-      const padY = w * 0.012;
-      const fsCondition = Math.max(w * 0.025, 18);
-      const fsBrand = Math.max(w * 0.055, 36);
-
-      let maxLineW = 0;
-      if (opts.brand) {
-        ctx.font = `bold ${fsBrand}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-        maxLineW = Math.max(maxLineW, ctx.measureText(opts.brand).width);
-      }
-      if (opts.condition) {
-        ctx.font = `${fsCondition}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-        maxLineW = Math.max(maxLineW, ctx.measureText(opts.condition).width);
-      }
-      const boxW = maxLineW + padX * 2;
-      const condH = opts.condition ? fsCondition * 1.5 : 0;
-      const brandH = opts.brand ? fsBrand * 1.3 : 0;
-      const boxH = condH + brandH + padY * 2;
-      const boxX = w * 0.03;
-      const boxY = w * 0.03;
-
-      ctx.fillStyle = 'rgba(255,255,255,0.92)';
-      roundRect(ctx, boxX, boxY, boxW, boxH, 6);
-      ctx.fill();
-
-      let y = boxY + padY;
-      if (opts.condition) {
-        y += fsCondition;
-        ctx.font = `${fsCondition}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-        ctx.fillStyle = '#7d8794';
-        ctx.fillText(opts.condition, boxX + padX, y);
-        y += fsCondition * 0.4;
-      }
-      if (opts.brand) {
-        y += fsBrand;
-        ctx.font = `bold ${fsBrand}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-        ctx.fillStyle = '#26405f';
-        ctx.fillText(opts.brand, boxX + padX, y);
-      }
-    }
-
-    // 価格を右下に
-    if (opts.price) {
-      const priceText = `¥${Number(opts.price).toLocaleString()}`;
-      const fsPrice = Math.max(w * 0.04, 26);
-      ctx.font = `bold ${fsPrice}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-      const pw = ctx.measureText(priceText).width;
-      const padP = w * 0.015;
-      const px = w - pw - padP * 2 - w * 0.03;
-      const py = h - fsPrice * 1.5 - w * 0.03;
-      ctx.fillStyle = 'rgba(255,255,255,0.90)';
-      roundRect(ctx, px, py, pw + padP * 2, fsPrice * 1.5, 4);
-      ctx.fill();
+  // 左上に文字を描く（背景は透過のまま。読みやすさのため白いふちどりを付ける）
+  function drawTextTopLeft(ctx, w, h, lines) {
+    if (!lines || !lines.length) return;
+    const fs = Math.max(w * 0.052, 30);          // 文字サイズ
+    const lh = fs * 1.32;                          // 行間
+    const marginX = w * 0.045;
+    let y = h * 0.05 + fs;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `bold ${fs}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
+    ctx.lineJoin = 'round';
+    for (let i = 0; i < lines.length; i++) {
+      // 白いふちどり（透過背景でも読める）
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      ctx.lineWidth = Math.max(fs * 0.18, 4);
+      ctx.strokeText(lines[i], marginX, y);
+      // 本体（ネイビー）
       ctx.fillStyle = '#26405f';
-      ctx.fillText(priceText, px + padP, py + fsPrice);
-    }
-  }
-
-  function drawLabelTemplateB(canvas, opts) {
-    // 価格訴求：左上に大きな価格、その下にブランド（純赤は使わずスモーキーピンク＋ネイビー）
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-
-    const startX = w * 0.04;
-    let y = w * 0.04;
-
-    if (opts.price) {
-      const priceText = `¥${Number(opts.price).toLocaleString()}`;
-      const fsPrice = Math.max(w * 0.10, 60);
-      ctx.font = `900 ${fsPrice}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-      // 白テキスト影で読みやすさ確保
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.fillText(priceText, startX - 2, y + fsPrice + 2);
-      ctx.fillText(priceText, startX + 2, y + fsPrice - 2);
-      ctx.fillStyle = '#bd7886';
-      ctx.fillText(priceText, startX, y + fsPrice);
-      y += fsPrice + w * 0.015;
-    }
-
-    if (opts.brand) {
-      const fsBrand = Math.max(w * 0.035, 22);
-      ctx.font = `bold ${fsBrand}px "游ゴシック", YuGothic, "Hiragino Sans", sans-serif`;
-      // 白テキスト影
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.fillText(opts.brand, startX - 1, y + fsBrand + 1);
-      ctx.fillStyle = '#26405f';
-      ctx.fillText(opts.brand, startX, y + fsBrand);
-    }
-  }
-
-  function drawLabels(canvas, labels) {
-    if (labels.template === 'B') {
-      drawLabelTemplateB(canvas, labels);
-    } else {
-      drawLabelTemplateA(canvas, labels);
+      ctx.fillText(lines[i], marginX, y);
+      y += lh;
     }
   }
 
   async function buildLabeledCanvas() {
     if (!resultBlob) return null;
     const labels = getLabelValues();
-    const finishOpts = getFinishOpts();
 
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(resultBlob);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        // まず透過PNGをそのままCanvasに描画
-        const baseCanvas = document.createElement('canvas');
-        baseCanvas.width = img.naturalWidth;
-        baseCanvas.height = img.naturalHeight;
-        baseCanvas.getContext('2d').drawImage(img, 0, 0);
-        // 仕上げ調整（影＋明るさ）適用
-        const finishedCanvas = applyFinish(baseCanvas, finishOpts);
-        // 文字入れ描画
-        drawLabels(finishedCanvas, labels);
-        resolve(finishedCanvas);
+        // 元の透過PNGを一旦Canvasへ
+        const src = document.createElement('canvas');
+        src.width = img.naturalWidth;
+        src.height = img.naturalHeight;
+        src.getContext('2d').drawImage(img, 0, 0);
+
+        const W = img.naturalWidth, H = img.naturalHeight;
+        const out = document.createElement('canvas');
+        out.width = W; out.height = H;               // 背景は塗らない＝透過のまま
+        const octx = out.getContext('2d');
+
+        // 商品を「右側」に配置。文字がある時は右60%、無い時は中央寄せで少しだけ右。
+        const bbox = getAlphaBBox(src);
+        const hasText = labels.lines && labels.lines.length > 0;
+        const regionRightRatio = hasText ? 0.60 : 0.94; // 商品を収める右側領域の幅割合
+        const regionW = W * regionRightRatio;
+        const regionH = H * 0.90;
+        const scale = Math.min(regionW / bbox.w, regionH / bbox.h, 1.6);
+        const drawW = bbox.w * scale;
+        const drawH = bbox.h * scale;
+        const marginR = W * 0.04;
+        const destX = W - drawW - marginR;                 // 右寄せ
+        const destY = (H - drawH) / 2;                     // 縦中央
+        octx.drawImage(src, bbox.x, bbox.y, bbox.w, bbox.h, destX, destY, drawW, drawH);
+
+        // 文字を左上に
+        if (hasText) drawTextTopLeft(octx, W, H, labels.lines);
+
+        resolve(out);
       };
       img.onerror = reject;
       img.src = url;
