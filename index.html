@@ -4769,7 +4769,16 @@ function programSideEffects(def){
    下の CH で自由に変えられます。あいことばは「プロラインのプレゼント合言葉」と“共通の1個”にしてください。
    例）Day1のプロライン合言葉＝はじまり ＝ このツールのあいことば。ライブでしか言わないので
    「リアタイを見た人だけ入れられる」を、日付ゲート（当日以降のみ有効）でも二重に守っています。 */
-var CH_ON = !/[?&]ch=0/.test(location.search);   // 既定ON。参加者以外に隠したいときだけ URL末尾に ?ch=0
+/* ★チャレンジは既定OFF＝一般の販売用ツール(プレーンURL)には出ない。
+   参加者専用リンク ?ch=1 か、あいことばリンク ?stamp=◯◯ で来た端末だけONにし、以後も記憶して表示。?ch=0で解除。 */
+var CH_ON = (function(){
+  var q = location.search || "";
+  try{
+    if(/[?&]ch=0/.test(q)){ localStorage.removeItem("smasell_ch_on"); return false; }
+    if(/[?&](ch=1|stamp=)/.test(q)){ localStorage.setItem("smasell_ch_on","1"); return true; }
+    return localStorage.getItem("smasell_ch_on")==="1";
+  }catch(e){ return /[?&](ch=1|stamp=)/.test(q); }
+})();
 var CH = {
   title:"スマセル 夏の4日間チャレンジ",
   sub:"7/15（水）→ 7/18（土）｜毎晩21:00 ライブ",
