@@ -4916,11 +4916,7 @@ function renderChallengeHero(){
     body='<div class="chDay">'+
       '<div class="chDayHd"><span class="chDayN">Day'+d.n+'</span><span class="chDayTh">'+d.theme+'</span><span class="chDayDt">'+chDateJp(d.date)+'（'+d.wday+'）21:00</span></div>'+
       '<p class="chLede">'+d.tip+'</p>'+ preNote + kwBlock + subBlock +
-      '<div class="chGift">🎁 今日のプレゼント：<b>'+d.present+'</b>'+
-        (chProlineSet()
-          ? '<button class="chBtn line" style="margin-top:9px" onclick="chOpenPresent('+d.n+')">プロラインで受け取る（あいことば入力ずみで開きます）</button>'
-          : '<small>あいことばをプロラインに送ると受け取れます</small>')+
-      '</div>'+
+      '<div class="chGift">🎁 <b>あいことば</b>をプロラインに送ると、その日だけのプレゼントが届きます♡<small>「きめる」を押すとプロラインが開きます</small></div>'+
     '</div>';
   }
   host.innerHTML='<div class="chWrap"><div class="chCard">'+head+body+'</div></div>';
