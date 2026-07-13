@@ -879,10 +879,14 @@
       setProgress(70, '背景を削除しています...', 'AIが背景領域を特定しています');
 
       const resultBlobData = await lib.removeBackground(prepared, {
+        // 軽量モデル(約40MB)を使用。既定のisnet_fp16は約88MBあり、スマホでDL失敗・メモリ落ち＝エラーの原因になるため。
+        model: 'isnet_quint8',
         progress: (key, current, total) => {
           if (total > 0) {
+            const isFetch = String(key).indexOf('fetch') >= 0;
+            const label = isFetch ? 'AIモデルを読み込み中...' : '背景を削除しています...';
             const pct = Math.round(50 + (current / total) * 40);
-            setProgress(pct, '背景を削除しています...', `処理中... ${Math.round((current / total) * 100)}%`);
+            setProgress(pct, label, `${Math.round((current / total) * 100)}%`);
           }
         }
       });
