@@ -754,6 +754,69 @@
   body{padding-top:33px;}
   .hud{top:33px !important;}
   .intro-ov{padding-top:33px;}
+
+  /* ==================== スマセル4日間チャレンジ・スタンプ帳 ==================== */
+  .chWrap{margin:2px 0 16px;position:relative;}
+  .chCard{background:linear-gradient(162deg,#ffffff 0%,#fdf2f6 48%,#eef1fb 100%);border:1px solid var(--line);
+    border-radius:22px;padding:16px 15px 18px;box-shadow:0 12px 34px rgba(189,120,134,.16);position:relative;overflow:hidden;}
+  .chCard::before{content:"";position:absolute;top:-46px;right:-34px;width:140px;height:140px;border-radius:50%;
+    background:radial-gradient(circle,rgba(143,192,236,.28),transparent 70%);}
+  .chCard::after{content:"";position:absolute;bottom:-40px;left:-30px;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle,rgba(245,166,200,.22),transparent 70%);}
+  .chBadge{position:relative;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#fff;
+    background:linear-gradient(90deg,#F5A6C8,#C99BE8,#8FC0EC);padding:5px 12px;border-radius:999px;letter-spacing:.02em;
+    box-shadow:0 4px 12px rgba(201,155,232,.4);}
+  .chTitle{position:relative;font-weight:900;color:var(--navy);font-size:19px;line-height:1.34;margin:10px 0 3px;letter-spacing:-.01em;}
+  .chSub{position:relative;font-size:12px;color:var(--sub);font-weight:700;margin-bottom:13px;}
+  .chStamps{position:relative;display:flex;justify-content:space-between;gap:7px;margin:4px 0 2px;}
+  .chStamp{flex:1;text-align:center;}
+  .chDot{width:58px;height:58px;margin:0 auto 5px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;
+    border:2px dashed #e6cdd7;background:#fff;transition:transform .3s ease,box-shadow .3s ease;}
+  .chDot.open{border-style:solid;border-color:#8FC0EC;box-shadow:0 0 0 3px rgba(143,192,236,.16);}
+  .chDot.half{border-style:solid;border-color:#C99BE8;background:linear-gradient(90deg,#f4e8fb 0 50%,#ffffff 50% 100%);box-shadow:0 0 0 3px rgba(201,155,232,.14);}
+  .chDot.full{border:none;background:linear-gradient(158deg,#F5A6C8,#C99BE8,#8FC0EC);box-shadow:0 7px 18px rgba(201,155,232,.45);transform:scale(1.05);}
+  .chDot.locked{opacity:.55;background:#f7f2f4;border-color:#ecdde3;}
+  .chDot .mk{font-size:25px;font-weight:900;color:#fff;line-height:1;}
+  .chDot .lock{font-size:19px;filter:grayscale(.2);}
+  .chDot .dn{font-size:19px;font-weight:900;color:var(--pink);}
+  .chStamp .dl{font-size:10.5px;font-weight:800;color:var(--sub);}
+  .chStamp.cur .dl{color:var(--pinkd);}
+  .chStamp.cur .chDot.open{animation:chPulse 1.8s ease-in-out infinite;}
+  @keyframes chPulse{0%,100%{box-shadow:0 0 0 3px rgba(143,192,236,.16);}50%{box-shadow:0 0 0 7px rgba(143,192,236,.08);}}
+  .chDay{position:relative;margin-top:13px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 13px 14px;}
+  .chDayHd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
+  .chDayN{font-weight:900;color:#fff;font-size:12px;background:linear-gradient(90deg,#C99BE8,#8FC0EC);padding:3px 10px;border-radius:999px;}
+  .chDayTh{font-weight:900;color:var(--navy);font-size:14.5px;}
+  .chDayDt{margin-left:auto;font-size:11px;font-weight:800;color:var(--sub);}
+  .chLede{font-size:12.5px;color:var(--ink);line-height:1.6;margin:2px 0 11px;}
+  .chStep{background:#fbf6f8;border:1px solid var(--line);border-radius:13px;padding:10px 11px;margin-bottom:9px;}
+  .chStep.done{background:#f2f7fb;border-color:#dcebf6;color:var(--navy);font-weight:800;font-size:12.5px;display:flex;align-items:center;gap:7px;}
+  .chStepT{font-weight:900;color:var(--navy);font-size:12.5px;line-height:1.4;margin-bottom:8px;}
+  .chStepT small{display:block;font-weight:700;color:var(--sub);font-size:10.5px;margin-top:2px;}
+  .chChk{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;
+    background:linear-gradient(90deg,#8FC0EC,#C99BE8);color:#fff;font-size:12px;font-weight:900;flex:none;}
+  .chKwRow{display:flex;gap:7px;}
+  .chInp{flex:1;border:1.5px solid #e6cdd7;border-radius:11px;padding:9px 11px;font-size:14px;font-weight:700;color:var(--ink);background:#fff;outline:none;}
+  .chInp:focus{border-color:#C99BE8;box-shadow:0 0 0 3px rgba(201,155,232,.15);}
+  .chBtn{border:none;border-radius:11px;padding:9px 15px;font-size:13px;font-weight:900;color:#fff;cursor:pointer;
+    background:linear-gradient(90deg,#F5A6C8,#C99BE8);box-shadow:0 4px 12px rgba(201,155,232,.35);transition:transform .12s;white-space:nowrap;}
+  .chBtn:active{transform:scale(.96);}
+  .chBtn.line{width:100%;background:linear-gradient(90deg,#8FC0EC,#7fb0d2);}
+  .chBtn.full{width:100%;margin-top:10px;background:linear-gradient(90deg,#F5A6C8,#C99BE8,#8FC0EC);font-size:14px;padding:12px;}
+  .chMsg{min-height:15px;margin-top:7px;font-size:11.5px;font-weight:800;line-height:1.4;}
+  .chOk{color:var(--pinkd);}
+  .chNg{color:#c98a5f;}
+  .chUndo{margin-left:auto;font-size:11px;font-weight:800;color:#a9b7c4;cursor:pointer;text-decoration:underline;}
+  .chGift{margin-top:3px;background:linear-gradient(90deg,#fff7fa,#f6f2fc);border:1px dashed #e6cdd7;border-radius:12px;
+    padding:9px 11px;font-size:12px;font-weight:800;color:var(--navy);}
+  .chGift b{color:var(--pinkd);}
+  .chGift small{display:block;font-weight:700;color:var(--sub);font-size:10.5px;margin-top:2px;}
+  .chDone{position:relative;text-align:center;padding:6px 4px 2px;}
+  .chDoneT{font-weight:900;color:var(--navy);font-size:16px;margin-bottom:6px;}
+  .chDone p{font-size:12.5px;color:var(--ink);line-height:1.6;}
+  .chConf{position:absolute;top:0;width:8px;height:12px;border-radius:2px;opacity:.9;pointer-events:none;
+    animation:chFall 1.1s ease-in forwards;z-index:5;}
+  @keyframes chFall{0%{transform:translateY(-6px) rotate(0);opacity:1;}100%{transform:translateY(120px) rotate(220deg);opacity:0;}}
 </style>
 </head>
 <body>
@@ -825,6 +888,10 @@
   <!-- ========== 今日（ホーム）＝主役 ========== -->
   <section class="page active" id="page-home">
     <div id="homeAutoSaveBadge" style="display:none"></div>
+
+    <!-- ★スマセル4日間チャレンジ・スタンプ帳（参加者専用・?ch=0で非表示） -->
+    <div id="challengeHero"></div>
+
     <div class="home-hi" id="homeHi"></div>
 
     <!-- 診断ファースト：診断がまだのとき、ここに「まず診断」カードを主役表示 -->
@@ -4696,6 +4763,154 @@ function programSideEffects(def){
   if(rec.tags.indexOf("学習")<0){ rec.tags.push("学習"); }
   save();
 }
+
+/* ==================== スマセル4日間チャレンジ・スタンプ帳 ==================== */
+/* ★くみこへ：あいことば(kw)・オープンチャットURL(openchat)・プレゼント名(present)・課題(mission)は
+   下の CH で自由に変えられます。あいことばは「プロラインのプレゼント合言葉」と“共通の1個”にしてください。
+   例）Day1のプロライン合言葉＝はじまり ＝ このツールのあいことば。ライブでしか言わないので
+   「リアタイを見た人だけ入れられる」を、日付ゲート（当日以降のみ有効）でも二重に守っています。 */
+var CH_ON = !/[?&]ch=0/.test(location.search);   // 既定ON。参加者以外に隠したいときだけ URL末尾に ?ch=0
+var CH = {
+  title:"スマセル 夏の4日間チャレンジ",
+  sub:"7/15（水）→ 7/18（土）｜毎晩21:00 ライブ",
+  openchat:"",   // ★オープンチャットの招待URL（提出ボタンで開きます。空でも動作OK）
+  proline:"https://lgilwb8f.autosns.app/line",   // ★プロラインの登録/友だち追加URL（あいことば入力後に開く）
+  prolineOA:"@097hdcoy",  // LINE公式アカウントID（autosns.app/line の友だち追加先＝プロライン接続先）。あいことば"入力済み"でトークを開く
+  days:[
+    {n:1,date:"2026-07-15",wday:"水",theme:"売れる写真",kw:"コナン",present:"神テンプレ＆撮影ガイド",mins:"約5分",
+      mission:"お手持ちの1点を、明るい場所で3枚だけ撮ってオープンチャットに投稿",tip:"20枚ぶんのコツは今夜のライブで。まずは3枚だけでOKです☺"},
+    {n:2,date:"2026-07-16",wday:"木",theme:"ことば＆値付け",kw:"金田一",present:"おたすけ君プロンプト集",mins:"約5分",
+      mission:"「出品サポート」で1点の説明文と価格をつくって投稿",tip:"迷ったら、この子（出品サポート）にぜんぶおまかせ"},
+    {n:3,date:"2026-07-17",wday:"金",theme:"仕入れが“届く”体験",kw:"ビール",present:"利益シミュレーション特典",mins:"約5分",
+      mission:"“届く仕入れ”の利益を計算して、あなたの数字を投稿",tip:"“探す”んじゃない、“届く”を体感する日です"},
+    {n:4,date:"2026-07-18",wday:"土",theme:"お披露目＆発表",kw:"愛",present:"コンプリート賞・特別ご案内",mins:"約3分",
+      mission:"4日間でいちばん変わったことを、ひとことで投稿",tip:"完走したあなたへ。最後の1ピースを♡"}
+  ]
+};
+var CH_KEY="smasell_ch_v1";
+function chLoad(){ try{var r=localStorage.getItem(CH_KEY); if(r) return JSON.parse(r);}catch(e){} return {d:{}}; }
+function chSave(s){ try{localStorage.setItem(CH_KEY, JSON.stringify(s));}catch(e){} }
+function chNorm(x){ return (x||"").replace(/[\s　]/g,"").toLowerCase(); }
+function chToday(){ return (typeof nowDateStr==="function")? nowDateStr() : new Date().toISOString().slice(0,10); }
+function chStateOf(n){ var s=chLoad(); return s.d[n]||{k:false,s:false}; }
+function chSet(n,field,val){ var s=chLoad(); if(!s.d) s.d={}; if(!s.d[n]) s.d[n]={k:false,s:false}; s.d[n][field]=val; chSave(s); }
+function chUnlocked(day){ return chToday() >= day.date; }
+function chDateJp(iso){ var p=iso.split("-"); return (p[1]*1)+"/"+(p[2]*1); }
+function chStampClass(day){
+  var st=chStateOf(day.n);
+  if(!chUnlocked(day)) return "locked";
+  if(st.k && st.s) return "full";
+  if(st.k || st.s) return "half";
+  return "open";
+}
+function chDoneCount(){ var c=0; CH.days.forEach(function(d){var st=chStateOf(d.n); if(st.k&&st.s)c++;}); return c; }
+function chCurrentDay(){
+  var t=chToday();
+  for(var i=0;i<CH.days.length;i++){ if(CH.days[i].date===t) return CH.days[i]; }
+  if(t < CH.days[0].date) return CH.days[0];
+  for(var j=0;j<CH.days.length;j++){ var st=chStateOf(CH.days[j].n); if(!(st.k&&st.s)) return CH.days[j]; }
+  return CH.days[CH.days.length-1];
+}
+function chSubmitKeyword(n){
+  var day=CH.days[n-1]; var inp=document.getElementById("chKw"+n);
+  var v=chNorm(inp?inp.value:""); var msg=document.getElementById("chMsg"+n);
+  if(!chUnlocked(day)){ if(msg) msg.innerHTML="<span class='chNg'>この日はまだ開いていません。"+chDateJp(day.date)+"（"+day.wday+"）よる9時にあけてね☺</span>"; return; }
+  if(!v){ if(msg) msg.innerHTML="<span class='chNg'>ライブで発表される「あいことば」を入れてね</span>"; return; }
+  if(v===chNorm(day.kw)){
+    chSet(n,"k",true); chCelebrate(); renderChallengeHero();
+    var m2=document.getElementById("chMsg"+n); if(m2) m2.innerHTML="<span class='chOk'>スタンプ点灯♡ つづけてプロラインでプレゼントを受け取ってね</span>";
+    chOpenPresent(n);   // あいことば入力→そのままプロラインを開く（コナン等が入力済みで開く／完全自動送信はLINE仕様で不可のためワンタップ送信）
+  }
+  else { if(msg) msg.innerHTML="<span class='chNg'>あいことばがちがうみたい。ライブをもう一度チェックしてね</span>"; }
+}
+function chProlineSet(){ return !!(CH.proline||CH.prolineOA); }
+function chOpenPresent(n){
+  var day=CH.days[n-1]; if(!day) return; var url="";
+  if(CH.prolineOA){ var oa=CH.prolineOA.replace(/^@/,""); url="https://line.me/R/oaMessage/%40"+encodeURIComponent(oa)+"/?"+encodeURIComponent(day.kw); }
+  else if(CH.proline){ url=CH.proline; }
+  if(url){ try{ window.open(url,"_blank"); }catch(e){} }
+}
+function chToggleSubmit(n){
+  var day=CH.days[n-1]; if(!chUnlocked(day)) return;
+  var st=chStateOf(n);
+  if(!st.s){ chSet(n,"s",true); if(CH.openchat){ try{ window.open(CH.openchat,"_blank"); }catch(e){} } chCelebrate(); }
+  else { chSet(n,"s",false); }
+  renderChallengeHero();
+}
+function chComplete(){
+  if(CH.openchat){ try{window.open(CH.openchat,"_blank");}catch(e){} }
+  alert("エントリーを受け付けました♡\nコンプリート賞の発表は7/18（土）のライブでお伝えします。");
+}
+function chCelebrate(){
+  var host=document.getElementById("challengeHero"); if(!host) return;
+  var cols=["#F5A6C8","#C99BE8","#8FC0EC","#f6d365"];
+  for(var i=0;i<14;i++){ var s=document.createElement("span"); s.className="chConf";
+    s.style.left=(8+Math.random()*84)+"%"; s.style.background=cols[i%4]; s.style.animationDelay=(Math.random()*.2)+"s";
+    host.appendChild(s); (function(el){setTimeout(function(){ if(el&&el.remove) el.remove(); },1250);})(s); }
+}
+function renderChallengeHero(){
+  var host=document.getElementById("challengeHero"); if(!host) return;
+  if(!CH_ON){ host.innerHTML=""; return; }
+  var done=chDoneCount(), cur=chCurrentDay(), allDone=done>=4, t=chToday();
+  var stamps="";
+  CH.days.forEach(function(d){
+    var cls=chStampClass(d), isCur=(d.n===cur.n)&&!allDone, inner;
+    if(cls==="locked") inner='<span class="lock">🔒</span>';
+    else if(cls==="full") inner='<span class="mk">♡</span>';
+    else if(cls==="half") inner='<span class="mk" style="color:#C99BE8">◐</span>';
+    else inner='<span class="dn">'+d.n+'</span>';
+    stamps+='<div class="chStamp'+(isCur?' cur':'')+'"><div class="chDot '+cls+'">'+inner+'</div><div class="dl">Day'+d.n+'</div></div>';
+  });
+  var head='<div class="chBadge">☑ 参加者だけのスタンプ帳</div>'+
+    '<div class="chTitle">'+CH.title+'</div>'+
+    '<div class="chSub">'+CH.sub+'　—　あつめた印 <b style="color:var(--pinkd)">'+done+'</b>/4</div>'+
+    '<div class="chStamps">'+stamps+'</div>';
+  var body;
+  if(allDone){
+    body='<div class="chDone"><div class="chDoneT">4つのスタンプ、そろいました♡</div>'+
+      '<p>4日間、ほんとうにおつかれさまでした。完走はあなたが「ちゃんと動けた人」である何よりの証です。</p>'+
+      '<button class="chBtn full" onclick="chComplete()">コンプリート賞にエントリーする</button></div>';
+  } else if(t < CH.days[0].date){
+    body='<div class="chDay"><div class="chDayHd"><span class="chDayN">まもなく</span><span class="chDayTh">7/15（水）よる9時、スタート</span></div>'+
+      '<p class="chLede">初日のあいことばは、当日21時のライブでお伝えします。今夜はゆっくり、たのしみに待っていてくださいね☺</p></div>';
+  } else {
+    var d=cur, st=chStateOf(d.n);
+    var kwBlock = st.k
+      ? '<div class="chStep done"><span class="chChk">✓</span> リアタイ参加ずみ（あいことば受付）</div>'
+      : '<div class="chStep"><div class="chStepT">① ライブのあいことばを入れる<small>'+d.mins+'・ライブを見た人だけの合言葉</small></div>'+
+        '<div class="chKwRow"><input id="chKw'+d.n+'" class="chInp" placeholder="あいことばを入力" autocomplete="off"><button class="chBtn" onclick="chSubmitKeyword('+d.n+')">きめる</button></div>'+
+        '<div class="chMsg" id="chMsg'+d.n+'"></div></div>';
+    var subBlock = st.s
+      ? '<div class="chStep done"><span class="chChk">✓</span> オープンチャットに提出ずみ<a class="chUndo" onclick="chToggleSubmit('+d.n+')">とりけす</a></div>'
+      : '<div class="chStep"><div class="chStepT">② きょうの課題を提出する<small>'+d.mission+'</small></div>'+
+        '<button class="chBtn line" onclick="chToggleSubmit('+d.n+')">オープンチャットに提出した</button></div>';
+    body='<div class="chDay">'+
+      '<div class="chDayHd"><span class="chDayN">Day'+d.n+'</span><span class="chDayTh">'+d.theme+'</span><span class="chDayDt">'+chDateJp(d.date)+'（'+d.wday+'）21:00</span></div>'+
+      '<p class="chLede">'+d.tip+'</p>'+ kwBlock + subBlock +
+      '<div class="chGift">🎁 今日のプレゼント：<b>'+d.present+'</b>'+
+        (chProlineSet()
+          ? '<button class="chBtn line" style="margin-top:9px" onclick="chOpenPresent('+d.n+')">プロラインで受け取る（あいことば入力ずみで開きます）</button>'
+          : '<small>あいことばをプロラインに送ると受け取れます</small>')+
+      '</div>'+
+    '</div>';
+  }
+  host.innerHTML='<div class="chWrap"><div class="chCard">'+head+body+'</div></div>';
+}
+/* ★プロライン連動：自動応答リンク（例 .../reseller/?stamp=はじまり）で開くと、
+   あいことばが一致する日のリアタイ・スタンプを自動点灯（手入力なし）。日付ゲートは有効。 */
+var CH_LINK_HIT=null;
+function chConsumeLink(){
+  var m=(location.search||"").match(/[?&]stamp=([^&]+)/); if(!m) return;
+  var code; try{ code=chNorm(decodeURIComponent(m[1])); }catch(e){ code=chNorm(m[1]); }
+  if(!code) return;
+  CH.days.forEach(function(d){ if(chNorm(d.kw)===code && chUnlocked(d)){ chSet(d.n,"k",true); CH_LINK_HIT=d.n; } });
+  // URLからstampを消す（再読込での再発火・共有事故を防ぐ。履歴汚染なし）
+  try{ if(history.replaceState){ var q=(location.search||"").replace(/([?&])stamp=[^&]*(&|$)/,"$1").replace(/[?&]$/,""); history.replaceState(null,"",location.pathname+q+location.hash); } }catch(e){}
+}
+chConsumeLink();
+
+/* renderHome のたびにスタンプ帳も描き直す（既存の挙動は完全に保持したまま追記） */
+if(typeof renderHome==="function"){ var __chOrigRH=renderHome; renderHome=function(){ var r=__chOrigRH.apply(this,arguments); try{ renderChallengeHero(); if(CH_LINK_HIT){ chCelebrate(); CH_LINK_HIT=null; } }catch(e){} return r; }; }
 
 /* ============ init ============ */
 /* ===== はじめての説明書（オンボーディング） ===== */

@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スマセル 夏の4日間チャレンジ 本番運用マニュアル</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "游ゴシック", "Yu Gothic", "游ゴシック体", YuGothic, sans-serif;
+    background: #EFF6FB;
+    color: #1E2A4A;
+    line-height: 1.75;
+    font-size: 15px;
+  }
+  /* ===== Header ===== */
+  header {
+    background: linear-gradient(135deg, #2B4B8C 0%, #1E3A6E 100%);
+    color: #fff;
+    padding: 36px 24px 28px;
+    text-align: center;
+  }
+  header .badge {
+    display: inline-block;
+    background: #C9829A;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  header p {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  /* ===== Layout ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+  /* ===== Section ===== */
+  .section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 28px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(43,75,140,0.07);
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1E2A4A;
+    border-left: 4px solid #2B4B8C;
+    padding-left: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-num {
+    background: #2B4B8C;
+    color: #fff;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  /* ===== Flow Diagram ===== */
+  .flow-wrap {
+    background: #F0F6FD;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .flow-center {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .flow-keyword-box {
+    display: inline-block;
+    background: linear-gradient(135deg, #C9829A, #A5607C);
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    box-shadow: 0 3px 12px rgba(165,96,124,0.3);
+  }
+  .flow-keyword-label {
+    font-size: 11px;
+    color: #6B7FA8;
+    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .flow-arrow {
+    text-align: center;
+    font-size: 22px;
+    color: #2B4B8C;
+    margin: 6px 0;
+  }
+  .flow-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .flow-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 2px solid #B8D0EA;
+    text-align: center;
+  }
+  .flow-card.proline { border-color: #C9829A; }
+  .flow-card.tool { border-color: #2B4B8C; }
+  .flow-card-icon { font-size: 24px; margin-bottom: 4px; }
+  .flow-card-title { font-weight: 700; font-size: 13px; color: #1E2A4A; margin-bottom: 4px; }
+  .flow-card-desc { font-size: 12px; color: #5A6A8A; line-height: 1.6; }
+  .flow-card-result {
+    display: inline-block;
+    margin-top: 8px;
+    background: #EFF6FB;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1E3A6E;
+  }
+  .flow-note {
+    background: #FFF5F8;
+    border-left: 3px solid #C9829A;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #6B4055;
+    line-height: 1.65;
+  }
+  /* ===== Checklist ===== */
+  .day-block {
+    margin-bottom: 20px;
+  }
+  .day-header {
+    background: #2B4B8C;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .checklist-body {
+    background: #F7FAFD;
+    border: 1px solid #B8D0EA;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 14px 16px;
+  }
+  .cl-group { margin-bottom: 12px; }
+  .cl-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2B4B8C;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cl-group-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #B8D0EA;
+  }
+  .cl-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 13.5px;
+  }
+  .cl-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #2B4B8C;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: #fff;
+  }
+  .cl-time {
+    display: inline-block;
+    background: #C9829A;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 1px 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  /* ===== Proline Messages ===== */
+  .proline-card {
+    border: 1.5px solid #E8C4D0;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .proline-header {
+    background: linear-gradient(90deg, #C9829A, #B06882);
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .proline-header span { font-size: 11px; opacity: 0.85; font-weight: 400; }
+  .proline-body {
+    background: #FFF8FB;
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .proline-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #A07088;
+    padding: 4px 12px 8px;
+    background: #FFF8FB;
+  }
+  /* ===== OC Fixed Message ===== */
+  .oc-card {
+    background: #F0F6FD;
+    border: 1.5px solid #B8D0EA;
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .oc-body {
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  /* ===== Keyword Table ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 4px;
+  }
+  th {
+    background: #1E3A6E;
+    color: #fff;
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #D8E8F5;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #F4F9FD; }
+  tr:last-child td { border-bottom: none; }
+  .td-day {
+    font-weight: 700;
+    color: #1E3A6E;
+    white-space: nowrap;
+  }
+  .keyword-badge {
+    display: inline-block;
+    background: #C9829A;
+    color: #fff;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  /* ===== Link Method Section ===== */
+  .link-method-box {
+    background: #F0F6FD;
+    border: 2px solid #2B4B8C;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .link-method-flow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 14px 0;
+  }
+  .lmf-step {
+    background: #fff;
+    border: 1.5px solid #B8D0EA;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.55;
+    min-width: 130px;
+  }
+  .lmf-step strong { display: block; color: #1E3A6E; font-size: 12px; margin-bottom: 2px; }
+  .lmf-arrow { font-size: 20px; color: #2B4B8C; }
+  .lmf-result {
+    background: linear-gradient(135deg, #2B4B8C, #1E3A6E);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.55;
+    min-width: 140px;
+  }
+  .lmf-result strong { display: block; font-size: 12px; margin-bottom: 2px; opacity: 0.85; }
+  .link-method-notes {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .lmn-item {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .lmn-icon { flex-shrink: 0; }
+  .link-honest {
+    background: #EFF6FB;
+    border-left: 3px solid #6B7FA8;
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #4A5A7A;
+    margin-top: 10px;
+    line-height: 1.65;
+  }
+  /* ===== Stamp Guide ===== */
+  .stamp-guide {
+    background: #EFF6FB;
+    border: 1.5px dashed #2B4B8C;
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  /* ===== Q&A ===== */
+  .qa-item {
+    border: 1px solid #B8D0EA;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .qa-q {
+    background: #2B4B8C;
+    color: #fff;
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 13.5px;
+  }
+  .qa-a {
+    background: #F7FAFD;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    line-height: 1.75;
+  }
+  /* ===== Misc ===== */
+  .highlight {
+    background: #FFEDF4;
+    border-radius: 4px;
+    padding: 0 4px;
+    color: #A5607C;
+    font-weight: 700;
+  }
+  .note-box {
+    background: #EFF6FB;
+    border-left: 4px solid #2B4B8C;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #2B4B8C;
+    line-height: 1.75;
+  }
+  .tag {
+    display: inline-block;
+    background: #EFF6FB;
+    color: #2B4B8C;
+    border: 1px solid #B8D0EA;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  @media (max-width: 600px) {
+    .flow-cols { grid-template-columns: 1fr; }
+    .container { padding: 16px 12px 40px; }
+    .section { padding: 20px 16px 18px; }
+    header h1 { font-size: 20px; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Merone プロモーション事業部 内部マニュアル</div>
+  <h1>スマセル 夏の4日間チャレンジ<br>本番運用マニュアル</h1>
+  <p>7/15(水)〜7/18(土) 毎晩21時ライブ ｜ 作成日 2026-07-13</p>
+</header>
+
+<div class="container">
+
+  <!-- ============================
+       1. 全体フロー図
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">1</span>
+      全体フロー図 ― 「あいことば1個」がすべてをつなぐ
+    </div>
+
+    <div class="flow-wrap">
+      <div class="flow-center">
+        <div class="flow-keyword-label">くみこがライブで発表する</div>
+        <div class="flow-keyword-box">今日のあいことば</div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-cols">
+        <!-- プロライン -->
+        <div class="flow-card proline">
+          <div class="flow-card-icon">💬</div>
+          <div class="flow-card-title">① プロラインに送る</div>
+          <div class="flow-card-desc">
+            参加者が同じ言葉をプロLINEに送信<br>
+            → 自動応答でその日限定プレゼントをご案内
+          </div>
+          <div class="flow-card-result">プレゼント受け取り</div>
+        </div>
+        <!-- ツール -->
+        <div class="flow-card tool">
+          <div class="flow-card-icon">🎯</div>
+          <div class="flow-card-title">② ツールのスタンプ帳に入力</div>
+          <div class="flow-card-desc">
+            Re:sellerツールを開いてあいことばを入力<br>
+            → Dayスタンプが半分点灯（リアタイ参加の証明）
+          </div>
+          <div class="flow-card-result">スタンプ半分点灯</div>
+        </div>
+      </div>
+
+      <!-- 課題提出 -->
+      <div class="flow-arrow">↓ さらに</div>
+      <div class="flow-card" style="border-color:#2B4B8C; background:#fff; border-radius:10px; padding:14px; text-align:center;">
+        <div class="flow-card-icon">📝</div>
+        <div class="flow-card-title">③ オープンチャットに課題を提出（翌日18時まで）</div>
+        <div class="flow-card-desc">
+          ツールの「提出した」ボタンを押す → Dayスタンプが満月に<br>
+          ①＋③でそのDayスタンプが完成。4日全部 = コンプリート！
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-note">
+      ⚡ <strong>技術的な前提</strong>：プロLINE（LINE公式アカウント）は閉じた環境のため、スクレイピングによるプロライン↔ツールの自動連動は技術的に不可。あいことばが共通キーとなって、参加者自身が両方の操作を行う設計です。<br>
+      ⚡ <strong>Best3の照合</strong>はくみこがオープンチャットの集計機能で確認する人力照合です（システムの自動判定ではありません）。
+    </div>
+  </div>
+
+  <!-- ============================
+     1-B. リンク連動の仕組み
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num" style="background:#C9829A;">★</span>
+      スタンプ連動の仕組み ― ツール起点が主フロー
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:16px;">
+      ツールにあいことばを入力すると、スタンプ点灯＋プロラインのトークがあいことば入力ずみで開きます。送信ボタンを押すだけでプレゼントの自動応答が届く設計です。
+    </p>
+
+    <div class="link-method-box">
+      <div style="font-size:13px; font-weight:700; color:#1E3A6E; margin-bottom:10px;">【主フロー】ツール起点の参加者体験</div>
+      <div class="link-method-flow">
+        <div class="lmf-step">
+          <strong>① ツールを開く</strong>
+          スタンプ帳のあいことば<br>入力欄に「コナン」などを入力
+        </div>
+        <div class="lmf-arrow">→</div>
+        <div class="lmf-step">
+          <strong>② スタンプ点灯</strong>
+          Dayスタンプが<br>半分光る
+        </div>
+        <div class="lmf-arrow">→</div>
+        <div class="lmf-step">
+          <strong>③ トークが開く</strong>
+          プロラインがあいことば<br>入力ずみで起動
+        </div>
+        <div class="lmf-arrow">→</div>
+        <div class="lmf-result">
+          <strong>📩 送信ボタンを押すだけ</strong>
+          プレゼントの<br>自動応答が届く
+        </div>
+      </div>
+
+      <div class="link-method-notes">
+        <div class="lmn-item">
+          <span class="lmn-icon">⚙️</span>
+          <span><strong>設定メモ：</strong>ツールの <code>CH.prolineOA</code> にLINE公式アカウントのID（@から始まる文字列）を入力してください。未設定の場合はプロライン登録ページ（autosns.app/line）が開きます。</span>
+        </div>
+        <div class="lmn-item">
+          <span class="lmn-icon">ℹ️</span>
+          <span><strong>完全自動送信は不可：</strong>LINEの仕様上、Webページが本人になりすまして自動送信することはできません（スパム防止のため）。そのためツール→トーク起動→ワンタップ送信という方式にしています。</span>
+        </div>
+        <div class="lmn-item">
+          <span class="lmn-icon">🔗</span>
+          <span><strong>保険の逆フローも併存：</strong>プロラインの自動応答文面にも <code>?stamp=コナン</code> 形式のスタンプ点灯リンクを貼っています。ツール入力を押しそびれた参加者が後からリンクをタップしてもスタンプが光る、押しそびれ対策です。</span>
+        </div>
+      </div>
+
+      <div class="link-honest">
+        ℹ️ <strong>仕組みの正直な説明：</strong>ツール入力 → スタンプ点灯 → プロライントーク起動 → ワンタップ送信 → 自動応答、という流れです。LINEのスパム防止仕様により完全自動送信は不可能なため、「送信ボタンを1回押す」だけの設計にしています。
+      </div>
+    </div>
+
+    <div class="note-box">
+      ✏️ <strong>あいことばを変更した場合は、リンク末尾の <code>?stamp=◯◯</code> も同じ言葉に変えてください。</strong>（例：あいことばを「そら」に変えたら <code>?stamp=そら</code> にする）プロライン自動応答の文面とリンク末尾の両方を変更することを忘れずに。
+    </div>
+  </div>
+
+  <!-- ============================
+       2. 毎日の運営チェックリスト
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">2</span>
+      毎日の運営チェックリスト（Day1〜4 共通テンプレ）
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:16px;">Day別のあいことばのみ異なります。印刷してそのまま使えます。</p>
+
+    <!-- 21時前 -->
+    <div class="day-block">
+      <div class="day-header">【ライブ前】20:30〜20:55 準備</div>
+      <div class="checklist-body">
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">20:30</span> プロライン確認</div>
+          <div class="cl-item"><div class="cl-box"></div><span>当日のあいことば自動応答がONになっているか確認（前日のキーワードはOFFにする）</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>プロライン自動応答文面を開いて、プレゼントリンク・内容が正しいか最終確認</span></div>
+        </div>
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">20:45</span> ライブ配信準備</div>
+          <div class="cl-item"><div class="cl-box"></div><span>スマセルオープンチャットに「本日21時〜ライブ！ 少し早めにスタンバイしてね☺」を投稿</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>今日のあいことばをメモ帳やホワイトボードに書いて手元に置く</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>ライブ配信開始テスト（音声・映像確認）</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ライブ中 -->
+    <div class="day-block">
+      <div class="day-header">【ライブ中】21:00〜</div>
+      <div class="checklist-body">
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">21:00</span> 開始〜10分</div>
+          <div class="cl-item"><div class="cl-box"></div><span>「こんばんはー☺ Day◯ はじめよう！」で明るくスタート</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>今日のテーマと課題を冒頭で共有（所要時間の目安も伝える）</span></div>
+        </div>
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">ライブ途中</span> あいことば発表</div>
+          <div class="cl-item"><div class="cl-box"></div><span>本日のテーマを説明した後、「今日のあいことばは <span class="highlight">〇〇</span> だよ♡ プロラインにもツールにも送ってね」とひとこと発表</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>チャット欄にもあいことばをテキスト入力しておく（見逃し防止）</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>「プロラインに送ると今日のプレゼントが届くよ、ツールに入力するとスタンプが半分光るよ」と両方のアクションを案内</span></div>
+        </div>
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">ライブ後半</span> 課題・クロージング</div>
+          <div class="cl-item"><div class="cl-box"></div><span>今日の課題をオープンチャットに投稿するよう案内（「明日18時まで大丈夫だよ☺」と伝える）</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>Day4（7/18）はコンプリート賞の説明も添える</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ライブ後 -->
+    <div class="day-block">
+      <div class="day-header">【ライブ後】22:00〜翌日</div>
+      <div class="checklist-body">
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">22:00</span> 当日中</div>
+          <div class="cl-item"><div class="cl-box"></div><span>オープンチャットに「今日もありがとう♡ 課題は明日18時まで受け付けてるよ」の締めコメント投稿</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>参加者の反応・コメントを確認（Q&Aのメモ書き）</span></div>
+        </div>
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">翌日18時</span> 課題〆切後</div>
+          <div class="cl-item"><div class="cl-box"></div><span>オープンチャットの集計機能でDay◯の課題提出数を確認</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>Best3を選んでオープンチャットで発表（スクショ活用でOK）</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>牛肉・フルーツ・Amazonギフト券 それぞれの当選者にプロラインまたはオープンチャットDMで連絡</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>翌日ライブのプロライン自動応答を翌日のあいことばに差し替え・ONに設定</span></div>
+        </div>
+        <div class="cl-group">
+          <div class="cl-group-title"><span class="cl-time">Day4後のみ</span> コンプリート確認</div>
+          <div class="cl-item"><div class="cl-box"></div><span>ツール側でコンプリート達成者を確認（管理画面 or スプシ照合）</span></div>
+          <div class="cl-item"><div class="cl-box"></div><span>コンプリート賞（30万円キャッシュバック相当）の特別ご案内を送付</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       3. プロライン自動応答 文面（4通）
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">3</span>
+      プロライン自動応答 文面（Day1〜4 完成版）
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:18px;">あいことばのキーワードに反応する自動応答メッセージです。コピペしてプロラインに設定してください。<br>
+    ※ Day別にON/OFFを切り替えること（前日のあいことばはOFFにする）</p>
+
+    <!-- Day1 -->
+    <div class="proline-card">
+      <div class="proline-header">
+        Day1（7/15 水）　あいことば：「コナン」
+        <span>テーマ：売れる写真</span>
+      </div>
+      <div class="proline-body">送ってくれてありがとう☺
+
+「コナン」のキーワード確認できたよ♡
+
+今日のプレゼント「神テンプレ＆撮影ガイド」はこちら
+→ [プレゼントURL]
+
+写真1枚で反応が変わるって本当で、
+このガイドには今夜すぐ試せるコツが入ってます。
+
+▶ スタンプはこちらから（タップするだけで点きます）
+→ https://kumiko0814.github.io/reseller/?stamp=コナン
+
+今日の課題（写真3枚）は明日18時までに
+オープンチャットに投稿してね。（5分でできるよ）
+
+今夜のライブお疲れ様でした♩</div>
+      <div class="proline-char-count">約 220字</div>
+    </div>
+
+    <!-- Day2 -->
+    <div class="proline-card">
+      <div class="proline-header">
+        Day2（7/16 木）　あいことば：「金田一」
+        <span>テーマ：ことば＆値付け</span>
+      </div>
+      <div class="proline-body">送ってくれてありがとう☺
+
+「金田一」のキーワード確認できたよ♡
+
+今日のプレゼント「おたすけ君プロンプト集」はこちら
+→ [プレゼントURL]
+
+ことばが変わると値段の受け取り方も変わる、
+そのヒントが詰まってます。
+
+▶ スタンプはこちらから（タップするだけで点きます）
+→ https://kumiko0814.github.io/reseller/?stamp=金田一
+
+課題は明日18時までオープンチャットに投稿すると
+スタンプが満月になるよ。お楽しみに♩</div>
+      <div class="proline-char-count">約 215字</div>
+    </div>
+
+    <!-- Day3 -->
+    <div class="proline-card">
+      <div class="proline-header">
+        Day3（7/17 金）　あいことば：「ビール」
+        <span>テーマ：仕入れが"届く"体験</span>
+      </div>
+      <div class="proline-body">送ってくれてありがとう☺
+
+「ビール」のキーワード確認できたよ♡
+
+今日のプレゼント「利益シミュレーション特典」はこちら
+→ [プレゼントURL]
+
+自分の数字を入れると可能性が一気に見えてくる
+シートです。今夜中に触ってみてね。
+
+▶ スタンプはこちらから（タップするだけで点きます）
+→ https://kumiko0814.github.io/reseller/?stamp=ビール
+
+明日18時までに課題を投稿したらスタンプ満月に。
+もう少し、一緒にがんばろう♩</div>
+      <div class="proline-char-count">約 220字</div>
+    </div>
+
+    <!-- Day4 -->
+    <div class="proline-card">
+      <div class="proline-header">
+        Day4（7/18 土）　あいことば：「愛」
+        <span>テーマ：お披露目＆発表</span>
+      </div>
+      <div class="proline-body">送ってくれてありがとう☺
+
+「愛」のキーワード確認できたよ♡
+
+今日のプレゼント、そしてコンプリート賞の詳しいご案内はこちら
+→ [プレゼント＆コンプリート賞URL]
+
+▶ スタンプはこちらから（タップするだけで点きます）
+→ https://kumiko0814.github.io/reseller/?stamp=愛
+
+4日間、本当にすごいと思ってる。
+最終日の課題を投稿したらDay4スタンプが満月に。
+
+4日分すべてのスタンプが揃ったら
+コンプリート特別ご案内をお届けします。
+
+今日の課題は明日（7/19 日）18時まで大丈夫だよ☺
+最後まで一緒にいきましょう♩</div>
+      <div class="proline-char-count">約 245字</div>
+    </div>
+
+    <div class="note-box">
+      ✏️ <strong>文面はくみこが自由に変更OK</strong>。プレゼントURLの部分は実際のリンクに差し替えてください。同じ絵文字が1メッセージ内で重複しないようご注意を（自動チェック済みですが念のため）。<br><br>
+      ⚠️ <strong>あいことばを変えたら、スタンプ点灯リンク末尾の <code>?stamp=◯◯</code> も同じ言葉に変えてください。</strong>文面のあいことばとリンク末尾の両方を揃えることで正常に点灯します。
+    </div>
+  </div>
+
+  <!-- ============================
+       4. オープンチャット 固定メッセージ
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">4</span>
+      オープンチャット 固定メッセージ（チャレンジ開始前に設定）
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:14px;">チャレンジ開始前（7/14まで）に固定メッセージとして設定してください。</p>
+
+    <div class="oc-card">
+      <div class="oc-body">🌊 スマセル 夏の4日間チャレンジ へようこそ！
+
+このオープンチャットは、チャレンジ参加者のための専用スペースです。
+
+【参加ルール 4か条】
+
+① まず自己紹介を一言書いてね
+　 どこにお住まい、何を出品してみたいか、など
+　 ほかのみんなも参加しやすくなるから嬉しい☺
+
+② 毎晩21時のライブはリアタイ視聴がおすすめ
+　 くみこがその日限定の「あいことば」を発表するよ
+　 アーカイブでも楽しめるけど、リアタイだとスタンプが光る♡
+
+③ 質問や個別相談は、チャレンジ専用LINEへ
+　 オープンチャットは課題発表と交流の場として使ってね
+
+④ 課題提出は翌日18時まで
+　 投稿したらツールの「提出した」ボタンも押すとスタンプが満月に！
+
+【賞について】
+◎ Best3賞（各Day）
+　 牛肉・フルーツ・Amazonギフト券のいずれかをプレゼント
+　 くみこが全投稿を見てベスト3を選ぶよ
+
+◎ コンプリート賞
+　 4日間すべてのスタンプが揃った人には特別なご案内を送るね
+
+"見るだけ"はもったいない♡
+まず1行でいいから、ここに書いてみてね。
+4日間、一緒に楽しもう！</div>
+    </div>
+  </div>
+
+  <!-- ============================
+       5. あいことば早見表
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">5</span>
+      あいことば早見表（ライブ中に手元へ）
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:14px;">ツール側の初期設定値です。くみこが変更したい場合はツール管理画面で上書きOKです。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>日付・曜日</th>
+          <th>テーマ</th>
+          <th>あいことば</th>
+          <th>プレゼント</th>
+          <th>課題（翌日18時まで）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-day">Day1</td>
+          <td>7/15（水）</td>
+          <td>売れる写真</td>
+          <td><span class="keyword-badge">コナン</span></td>
+          <td>神テンプレ＆撮影ガイド</td>
+          <td>手持ち1点を明るい場所で3枚撮ってオープンチャットに投稿</td>
+        </tr>
+        <tr>
+          <td class="td-day">Day2</td>
+          <td>7/16（木）</td>
+          <td>ことば＆値付け</td>
+          <td><span class="keyword-badge">金田一</span></td>
+          <td>おたすけ君プロンプト集</td>
+          <td>出品サポートで1点の説明文と価格をつくって投稿</td>
+        </tr>
+        <tr>
+          <td class="td-day">Day3</td>
+          <td>7/17（金）</td>
+          <td>仕入れが"届く"体験</td>
+          <td><span class="keyword-badge">ビール</span></td>
+          <td>利益シミュレーション特典</td>
+          <td>届く仕入れの利益を計算して自分の数字を投稿</td>
+        </tr>
+        <tr>
+          <td class="td-day">Day4</td>
+          <td>7/18（土）</td>
+          <td>お披露目＆発表</td>
+          <td><span class="keyword-badge">愛</span></td>
+          <td>コンプリート賞・特別ご案内</td>
+          <td>4日間でいちばん変わったことをひとことで投稿</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      ✏️ あいことばは各日21時以降のみ有効（ツールの日付ゲートで制御）。当日21時前に入力しても反応しません。
+    </div>
+  </div>
+
+  <!-- ============================
+       6. スタンプ帳の使い方（参加者向け）
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">6</span>
+      参加者に配る「スタンプ帳の使い方」（コピペで送れる短文）
+    </div>
+    <p style="font-size:13px; color:#5A6A8A; margin-bottom:14px;">チャレンジ開始前のプロライン配信やオープンチャットでそのまま送れます。</p>
+
+    <div class="stamp-guide">🌟 Re:sellerツール（スタンプ帳付き特別版）の使い方
+
+まず下のURLからツールを開いてね
+→ [ツールURL]
+
+---
+
+【スタンプを光らせる2ステップ】
+
+STEP 1 ライブ中に「今日のあいことば」を聞く
+　　　　（毎晩21時〜 くみこが発表します）
+
+STEP 2 ツールを開いて「あいことばを入力」欄に
+　　　　聞いたキーワードをそのまま入力 → スタンプ半分が点灯！
+
+---
+
+【スタンプを満月にする方法】
+・オープンチャットに課題を投稿（翌日18時まで）
+・ツールの「提出した」ボタンを押す
+→ そのDayのスタンプが満月に！
+
+4日間すべて揃うとコンプリート達成 → 特別ご案内が届きます♡
+
+---
+
+【補足】
+・ツールは同じスマホ・ブラウザで開いてね（データが引き継がれます）
+・ブックマークしておくと毎日すぐ開けるよ
+・ツールURLは上記のまま開けばOK（?ch=0 などのオプション入力は不要です）
+
+わからないことがあれば
+チャレンジ専用LINEに気軽に送ってね☺</div>
+  </div>
+
+  <!-- ============================
+       7. 困ったときQ&A
+  ============================= -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">7</span>
+      困ったときQ&A（参加者サポート用）
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q1. あいことばを入力したのにスタンプが光らない</div>
+      <div class="qa-a">
+        <strong>① ライブ当日の21時以降に入力しているか確認してください。</strong><br>
+        各あいことばはその日の21時以降のみ有効です（ツールの日付ゲート機能により制御）。ライブ視聴中またはその後に入力していれば反映されます。<br><br>
+        <strong>② 文字が正確に一致しているか確認してください。</strong><br>
+        全角・半角・スペースの有無に注意。くみこがライブで発表したとおりの表記で入力してみてね。
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q2. スタンプが消えてしまった / 前のDayが見えない</div>
+      <div class="qa-a">
+        <strong>同じスマホ・同じブラウザでツールURLを開いてください。</strong><br>
+        スタンプのデータはブラウザのローカルストレージに保存されています。別のブラウザやシークレットモードで開くとデータが見えなくなります。<br>
+        ブックマークしておくと毎日同じ場所から開けて安心です☺
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q3. プロラインにあいことばを送ったけど自動応答が来ない</div>
+      <div class="qa-a">
+        <strong>以下を確認してください。</strong><br>
+        ① その日のライブ後（21時以降）に送信しているか<br>
+        ② キーワードの文字・表記が正確か（コピペ推奨）<br>
+        ③ プロLINEのブロックをしていないか<br><br>
+        上記を確認しても届かない場合は、チャレンジ専用LINEへご連絡ください。くみこが確認します。
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q4. 課題を投稿したけど「提出した」ボタンをうっかり押し忘れた</div>
+      <div class="qa-a">
+        あとから気づいた場合でも、課題提出〆切（翌日18時）内であればボタンを押してOKです。<br>
+        ボタンを押した時点でスタンプが満月になります。オープンチャットへの投稿が前提なので、投稿さえされていれば問題ありません♡
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q5. ライブに参加できなかった日がある。スタンプはどうなる？</div>
+      <div class="qa-a">
+        残念ながらあいことばスタンプ（半分点灯分）はリアタイ参加者への特典のため、後日補填はありません。<br>
+        ただし課題提出（翌日18時まで）はアーカイブを見てから提出OKです。<br>
+        コンプリートは4日すべてのスタンプ満月が条件ですが、ぜひ参加できた日だけでも楽しんでね☺
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <div style="text-align:center; font-size:12px; color:#8A9BC0; margin-top:8px; padding-top:8px; border-top:1px solid #D8E8F5;">
+    Merone プロモーション事業部 内部資料 ｜ スマセル 夏の4日間チャレンジ 本番運用マニュアル ｜ 2026-07-13 作成
+  </div>
+
+</div>
+</body>
+</html>
