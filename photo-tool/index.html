@@ -554,6 +554,24 @@
   }
   .finish-range-wrap input[type="range"],
   .finish-shadow-detail input[type="range"] { accent-color: var(--accent); }
+  /* ===== 保存オーバーレイ（長押しで保存） ===== */
+  #save-overlay { position: fixed; inset: 0; background: rgba(29,49,73,.72); z-index: 9999;
+    display: none; align-items: center; justify-content: center; padding: 18px; }
+  #save-overlay.show { display: flex; }
+  .save-card { background: #fff; border-radius: 20px; padding: 18px 16px 20px; max-width: 440px; width: 100%;
+    max-height: 92vh; overflow-y: auto; box-shadow: 0 18px 50px rgba(0,0,0,.3); text-align: center; }
+  .save-ttl { font-size: 17px; font-weight: 900; color: var(--navy); margin-bottom: 4px; }
+  .save-hint { font-size: 13px; font-weight: 800; color: var(--rosed); line-height: 1.6; margin-bottom: 12px; }
+  .save-hint b { color: var(--rosed); }
+  #save-img { width: 100%; border-radius: 12px; border: 1px solid var(--line);
+    background:
+      linear-gradient(45deg,#eceaf1 25%,transparent 25%,transparent 75%,#eceaf1 75%),
+      linear-gradient(45deg,#eceaf1 25%,#fff 25%,#fff 75%,#eceaf1 75%);
+    background-size: 20px 20px; background-position: 0 0,10px 10px;
+    -webkit-touch-callout: default; touch-callout: default; }
+  .save-note { font-size: 12px; color: var(--sub); font-weight: 700; line-height: 1.6; margin: 12px 0; background:#f4f7fb; border-radius:10px; padding:10px 12px; }
+  .save-note b { color: var(--navy); }
+  .save-card .btn { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -702,6 +720,20 @@
   </div>
 
   <p class="app-footer-note">動作確認はChrome / Safari 最新版で</p>
+</div>
+
+<!-- ===== 保存オーバーレイ（長押しで保存・LINE内ブラウザ対応） ===== -->
+<div id="save-overlay">
+  <div class="save-card">
+    <div class="save-ttl">保存する</div>
+    <p class="save-hint" id="save-hint">下の画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺</p>
+    <img id="save-img" alt="加工した画像">
+    <a id="save-dl" class="btn" style="display:none;">このボタンでダウンロード（PC）</a>
+    <div class="save-note" id="save-inapp-note" style="display:none;">
+      うまく保存できないときは、この画面の<b>右下（または右上）の「⋮」メニュー</b>から<br><b>「Safari / ブラウザで開く」</b>を選ぶと確実に保存できます。
+    </div>
+    <button class="btn btn-outline" onclick="closeSaveOverlay()">閉じる</button>
+  </div>
 </div>
 
 <script>
@@ -895,6 +927,31 @@
     }
   };
 
+  // ---- 保存（LINE等のアプリ内ブラウザはDL不可 → 長押しで保存できるよう画像表示）----
+  function isInAppBrowser() {
+    const ua = navigator.userAgent || '';
+    return /Line\/|FBAN|FBAV|Instagram|Twitter|Micromessenger|KAKAOTALK|NAVER/i.test(ua);
+  }
+  let _saveUrl = null;
+  function showSave(blob, filename) {
+    if (_saveUrl) { try { URL.revokeObjectURL(_saveUrl); } catch (e) {} }
+    _saveUrl = URL.createObjectURL(blob);
+    document.getElementById('save-img').src = _saveUrl;
+    const dl = document.getElementById('save-dl');
+    dl.href = _saveUrl; dl.download = filename;
+    const inApp = isInAppBrowser();
+    // アプリ内ブラウザ：DLボタンは失敗しがち→隠して「長押し保存」＋「ブラウザで開く」案内
+    dl.style.display = inApp ? 'none' : 'block';
+    document.getElementById('save-inapp-note').style.display = inApp ? 'block' : 'none';
+    document.getElementById('save-hint').innerHTML = inApp
+      ? '下の画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺'
+      : '画像を<b>長押し</b>で保存、またはPCは下のボタンでダウンロードできます☺';
+    document.getElementById('save-overlay').classList.add('show');
+  }
+  window.closeSaveOverlay = function() {
+    document.getElementById('save-overlay').classList.remove('show');
+  };
+
   window.downloadResult = async function() {
     if (!resultBlob) return;
     const finishOpts = getFinishOpts();
@@ -902,13 +959,8 @@
     const originalName = selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'result';
 
     if (!hasFinish) {
-      // 仕上げなし → 透過PNGをそのまま保存（既存動作）
-      const url = URL.createObjectURL(resultBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = originalName + '_bg-removed.png';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      // 仕上げなし → 透過PNGを保存（長押し保存オーバーレイ）
+      showSave(resultBlob, originalName + '_bg-removed.png');
     } else {
       // 仕上げあり → Canvas経由で保存
       const img = new Image();
@@ -921,12 +973,7 @@
         baseCanvas.getContext('2d').drawImage(img, 0, 0);
         const finishedCanvas = applyFinish(baseCanvas, finishOpts);
         finishedCanvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = originalName + '_finished.png';
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(url), 3000);
+          showSave(blob, originalName + '_finished.png');
         }, 'image/png');
       };
       img.src = blobUrl;
@@ -1321,13 +1368,8 @@
     const canvas = composeLabeled();
 
     canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
       const originalName = selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'result';
-      a.href = url;
-      a.download = originalName + '_labeled.png';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      showSave(blob, originalName + '_labeled.png');
     }, 'image/png');
   };
 
