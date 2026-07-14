@@ -585,6 +585,8 @@
   </header>
 
   <div class="container">
+    <!-- Android等アプリ内ブラウザ向け：最初からChromeで開くと保存できる案内 -->
+    <a id="openchrome-banner" style="display:none;text-decoration:none;"></a>
     <h2 class="page-title">写真を白抜き＆文字入れ</h2>
     <p class="page-lead">写真を選ぶだけで、AIが背景を自動で白抜きします。ブラウザ内で完結・写真は外部に送信しません。</p>
 
@@ -729,10 +731,9 @@
     <p class="save-hint" id="save-hint">下の「写真に追加」ボタンで保存できます☺</p>
     <img id="save-img" alt="加工した画像">
     <button id="save-share" class="btn" style="display:none;" onclick="doSharePhoto()">📷 写真に追加（保存する）</button>
+    <a id="save-openbrowser" class="btn" style="display:none;">🌐 Chrome で開いて保存する</a>
     <a id="save-dl" class="btn btn-outline" style="display:none;">ダウンロード（PC）</a>
-    <div class="save-note" id="save-inapp-note" style="display:none;">
-      うまく保存できないときは、この画面の<b>右下（または右上）の「⋮」メニュー</b>から<br><b>「Safari / ブラウザで開く」</b>を選ぶと確実に保存できます。
-    </div>
+    <div class="save-note" id="save-inapp-note" style="display:none;"></div>
     <button class="btn btn-outline" onclick="closeSaveOverlay()">閉じる</button>
   </div>
 </div>
@@ -949,25 +950,52 @@
       return !!(navigator.canShare && navigator.canShare({ files: [file] }));
     } catch (e) { return false; }
   }
+  function isIOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function isAndroid() { return /Android/i.test(navigator.userAgent || ''); }
+  function chromeIntentUrl() {
+    // 現在のページをChromeで開くAndroid intent（LINE内ブラウザからChromeを起動できる）
+    const hostPath = location.host + location.pathname + location.search;
+    return 'intent://' + hostPath + '#Intent;scheme=https;package=com.android.chrome;end';
+  }
   function showSave(blob, filename) {
     _saveBlob = blob; _saveName = filename || 'photo.png';
-    // 画像は data URL にする（スマホの長押し「写真に追加」が確実に効く。blob URLだと出ないことがある）
     blobToDataURL(blob).then(function (u) { const im = document.getElementById('save-img'); if (im) im.src = u; });
     if (_saveUrl) { try { URL.revokeObjectURL(_saveUrl); } catch (e) {} }
     _saveUrl = URL.createObjectURL(blob);
     const dl = document.getElementById('save-dl');
     dl.href = _saveUrl; dl.download = _saveName;
     const shareBtn = document.getElementById('save-share');
-    const canShare = canSharePhoto(blob, _saveName);   // iPhone/Android＝写真に追加が使える
+    const openBtn = document.getElementById('save-openbrowser');
+    const note = document.getElementById('save-inapp-note');
+    const hint = document.getElementById('save-hint');
+    const canShare = canSharePhoto(blob, _saveName);   // ファイル共有が実際に使えるか（iOS Safari/LINEは可、Android LINE内は不可）
     const inApp = isInAppBrowser();
-    // スマホ：写真に追加ボタンを主役に。使えない環境(主にPC)はダウンロードボタン。
-    if (shareBtn) shareBtn.style.display = canShare ? 'block' : 'none';
-    dl.style.display = canShare ? 'none' : 'block';
-    // 共有もDLも不安なアプリ内ブラウザだけ「ブラウザで開く」案内を出す
-    document.getElementById('save-inapp-note').style.display = (inApp && !canShare) ? 'block' : 'none';
-    document.getElementById('save-hint').innerHTML = canShare
-      ? '下の<b>「写真に追加」</b>ボタンで保存できます☺（うまくいかない時は画像を長押し）'
-      : '画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺（PCは下のボタン）';
+    // 全部いったん隠してから、環境に合わせて出す
+    shareBtn.style.display = 'none'; openBtn.style.display = 'none'; dl.style.display = 'none'; note.style.display = 'none';
+
+    if (canShare) {
+      // iPhone等：写真に追加ボタン（navigator.share）が主役
+      shareBtn.style.display = 'block';
+      hint.innerHTML = '下の<b>「写真に追加」</b>ボタンで保存できます☺（うまくいかない時は画像を長押し）';
+      if (inApp && isIOS()) { note.style.display = 'block'; note.innerHTML = 'できない時は、右下の共有アイコン→<b>「Safariで開く」</b>を選ぶと確実です。'; }
+    } else if (inApp && isAndroid()) {
+      // Android の LINE内ブラウザ：canvas画像は保存できない → Chromeで開くのが確実
+      openBtn.href = chromeIntentUrl();
+      openBtn.style.display = 'block';
+      note.style.display = 'block';
+      note.innerHTML = 'このLINEの画面だと画像を保存できません💦<br>上の<b>「Chromeで開いて保存」</b>を押すか、右上の「⋮」→<b>「他のブラウザで開く」</b>から開いて保存してね。';
+      hint.innerHTML = '保存は<b>Chrome / ブラウザ</b>で開いてね☺';
+    } else if (inApp) {
+      // その他アプリ内ブラウザ
+      note.style.display = 'block';
+      note.innerHTML = 'うまく保存できない時は、右上/右下のメニューから<b>「ブラウザで開く」</b>を選んでね。';
+      dl.style.display = 'block';
+      hint.innerHTML = '画像を<b>長押し</b>で保存、またはブラウザで開いてね☺';
+    } else {
+      // 普通のブラウザ / PC
+      dl.style.display = 'block';
+      hint.innerHTML = '画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺（PCは下のボタン）';
+    }
     document.getElementById('save-overlay').classList.add('show');
   }
   window.doSharePhoto = async function () {
@@ -1429,6 +1457,19 @@
     document.getElementById('error-msg').innerHTML = '<b>エラー:</b> ' + msg;
     document.getElementById('step-action').style.display = selectedFile ? 'block' : 'none';
   }
+
+  // Android の LINE等アプリ内ブラウザは canvas画像を保存できない → 最初からChromeで開く案内を上部に出す
+  (function initOpenChromeBanner() {
+    try {
+      const b = document.getElementById('openchrome-banner');
+      if (!b) return;
+      if (isInAppBrowser() && isAndroid()) {
+        b.href = chromeIntentUrl();
+        b.style.cssText = 'display:block;text-decoration:none;background:#fff7ed;border:1.5px solid #f0c98a;border-radius:12px;padding:11px 13px;margin-bottom:12px;color:#8a5a00;font-weight:800;font-size:12.5px;line-height:1.55;';
+        b.innerHTML = '📱 Androidの方へ：このLINEの画面だと写真を保存できないことがあります。<u>ここをタップして Chrome で開く</u>と、かんたんに保存できます☺';
+      }
+    } catch (e) {}
+  })();
 </script>
 </body>
 </html>
