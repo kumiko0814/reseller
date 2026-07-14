@@ -845,6 +845,12 @@
   .ht-list li{position:relative;padding:5px 0 5px 24px;font-size:13px;color:var(--ink);line-height:1.6;font-weight:600;}
   .ht-list li::before{content:attr(data-b);position:absolute;left:0;top:5px;color:var(--pinkd);font-weight:900;font-size:12px;}
   .ht-tip{background:#f2f7fb;border:1px dashed #dcebf6;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;color:#5f97be;line-height:1.6;margin-top:2px;}
+  /* ===== 時間解禁（準備中）カード ===== */
+  .lock-card{background:linear-gradient(160deg,#fff 0%,#fdf2f6 60%,#eef1fb 100%);border:1px solid var(--line);border-radius:20px;padding:30px 22px 28px;text-align:center;box-shadow:0 10px 30px rgba(189,120,134,.12);}
+  .lock-card .lock-emoji{font-size:40px;margin-bottom:8px;}
+  .lock-card .lock-ttl{font-weight:900;color:var(--navy);font-size:18px;line-height:1.5;margin-bottom:10px;}
+  .lock-card .lock-sub{font-size:12.5px;color:var(--sub);font-weight:700;line-height:1.7;}
+  .chLock{background:#f4f7fb;border:1px dashed #cdd9e6;border-radius:11px;padding:11px 12px;font-size:12.5px;font-weight:800;color:#5f97be;text-align:center;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -958,6 +964,7 @@
   <!-- ========== 道具箱（写真・出品・在庫・売上）＝入口ランチャー ========== -->
   <section class="page" id="page-box">
     <div class="sec-title">出品サポート<small>使いたいときに開く</small></div>
+    <div id="boxLockNote" class="lock-card" style="display:none"></div>
     <div class="tab-hero">
       <svg class="th-ic" viewBox="0 0 48 48" fill="none"><defs><linearGradient id="crownG" x1="0" y1="0" x2="48" y2="48"><stop offset="0" stop-color="#F5A6C8"/><stop offset=".5" stop-color="#C99BE8"/><stop offset="1" stop-color="#8FC0EC"/></linearGradient></defs><path d="M8 34l-3-16 9 6 10-14 10 14 9-6-3 16z" fill="url(#crownG)"/><rect x="8" y="34" width="32" height="6" rx="3" fill="url(#crownG)"/><circle cx="24" cy="10" r="3" fill="url(#crownG)"/><circle cx="5" cy="18" r="2.4" fill="url(#crownG)"/><circle cx="43" cy="18" r="2.4" fill="url(#crownG)"/></svg>
       <div class="th-tx">写真も、文章も、価格も。<small>この子がぜんぶおてつだいします☺</small></div>
@@ -1655,7 +1662,27 @@ function go(p){
   if(p==="stock"){ renderItems(); renderAutoSaveBadge(); renderGame(); renderDiag(); }
   if(p==="set"){ renderDiagSetting(); renderSyncRank(); }
   if(p==="mypage") renderMypage();
+  if(p==="box"){ try{ applyBoxGate(); }catch(e){} }
   window.scrollTo(0,0);
+}
+/* スマセル(?ch=1)のみ：出品サポートは開始時刻まで「準備中」にする（本番/モニターは常に使える） */
+function applyBoxGate(){
+  var box=document.getElementById("page-box"); if(!box) return;
+  var locked = (typeof CH_ON!=="undefined" && CH_ON) && (typeof chToolsOpen==="function") && !chToolsOpen();
+  var grid=box.querySelector(".box-grid");
+  var hero=box.querySelector(".tab-hero");
+  var foot=box.querySelector(".note");
+  var note=document.getElementById("boxLockNote");
+  if(grid) grid.style.display = locked ? "none" : "";
+  if(hero) hero.style.display = locked ? "none" : "";
+  if(foot) foot.style.display = locked ? "none" : "";
+  if(note){
+    note.style.display = locked ? "" : "none";
+    if(locked) note.innerHTML =
+      '<div class="lock-emoji">🔧</div>'+
+      '<div class="lock-ttl">出品サポートは<br>'+chOpenAtLabel()+'から使えます</div>'+
+      '<div class="lock-sub">写真の白ぬき・文字入れ・おたすけライト君などは、この時間になったらここに出てきます☺<br>もうすこしだけ待っていてね。</div>';
+  }
 }
 
 /* ============ item modal ============ */
@@ -4872,6 +4899,10 @@ var CH = {
   ]
 };
 var CH_KEY="smasell_ch_v1";
+// ★出品サポート・課題提出が使えるようになる日時（JST絶対時刻。端末のタイムゾーンに依存せず判定）
+var CH_OPEN_AT="2026-07-15T19:00:00+09:00";
+function chToolsOpen(){ try{ return Date.now() >= new Date(CH_OPEN_AT).getTime(); }catch(e){ return true; } }
+function chOpenAtLabel(){ return "7/15（水）19:00"; }
 function chLoad(){ try{var r=localStorage.getItem(CH_KEY); if(r) return JSON.parse(r);}catch(e){} return {d:{}}; }
 function chSave(s){ try{localStorage.setItem(CH_KEY, JSON.stringify(s));}catch(e){} }
 function chNorm(x){ return (x||"").replace(/[\s　]/g,"").toLowerCase(); }
@@ -4918,6 +4949,7 @@ function chOpenPresent(n){
 }
 function chToggleSubmit(n){
   var day=CH.days[n-1]; if(!chUnlocked(day)) return;
+  if(!chToolsOpen()) return;   // 開始時刻(7/15 19:00)まで提出不可
   var st=chStateOf(n);
   if(!st.s){ chSet(n,"s",true); if(CH.openchat){ try{ window.open(CH.openchat,"_blank"); }catch(e){} } chCelebrate(); }
   else { chSet(n,"s",false); }
@@ -4966,8 +4998,11 @@ function renderChallengeHero(){
         '<div class="chMsg" id="chMsg'+d.n+'"></div></div>';
     var subBlock = st.s
       ? '<div class="chStep done"><span class="chChk">✓</span> オープンチャットに提出ずみ<a class="chUndo" onclick="chToggleSubmit('+d.n+')">とりけす</a></div>'
-      : '<div class="chStep"><div class="chStepT">② きょうの課題を提出する<small>'+d.mission+'</small></div>'+
-        '<button class="chBtn line" onclick="chToggleSubmit('+d.n+')">オープンチャットに提出した</button></div>';
+      : (!chToolsOpen()
+          ? '<div class="chStep"><div class="chStepT">② きょうの課題を提出する<small>'+d.mission+'</small></div>'+
+            '<div class="chLock">📝 課題提出は '+chOpenAtLabel()+' から使えます</div></div>'
+          : '<div class="chStep"><div class="chStepT">② きょうの課題を提出する<small>'+d.mission+'</small></div>'+
+            '<button class="chBtn line" onclick="chToggleSubmit('+d.n+')">オープンチャットに提出した</button></div>');
     var preNote = preStart
       ? '<div class="chPre">この下の欄に、毎晩21時のライブで発表される「あいことば」を入れてね。スタートは7/15（水）です☺</div>'
       : '';
