@@ -726,9 +726,10 @@
 <div id="save-overlay">
   <div class="save-card">
     <div class="save-ttl">保存する</div>
-    <p class="save-hint" id="save-hint">下の画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺</p>
+    <p class="save-hint" id="save-hint">下の「写真に追加」ボタンで保存できます☺</p>
     <img id="save-img" alt="加工した画像">
-    <a id="save-dl" class="btn" style="display:none;">このボタンでダウンロード（PC）</a>
+    <button id="save-share" class="btn" style="display:none;" onclick="doSharePhoto()">📷 写真に追加（保存する）</button>
+    <a id="save-dl" class="btn btn-outline" style="display:none;">ダウンロード（PC）</a>
     <div class="save-note" id="save-inapp-note" style="display:none;">
       うまく保存できないときは、この画面の<b>右下（または右上）の「⋮」メニュー</b>から<br><b>「Safari / ブラウザで開く」</b>を選ぶと確実に保存できます。
     </div>
@@ -933,21 +934,52 @@
     return /Line\/|FBAN|FBAV|Instagram|Twitter|Micromessenger|KAKAOTALK|NAVER/i.test(ua);
   }
   let _saveUrl = null;
+  let _saveBlob = null, _saveName = 'photo.png';
+  function blobToDataURL(blob) {
+    return new Promise(function (resolve) {
+      const r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = function () { resolve(URL.createObjectURL(blob)); };
+      r.readAsDataURL(blob);
+    });
+  }
+  function canSharePhoto(blob, filename) {
+    try {
+      const file = new File([blob], filename, { type: 'image/png' });
+      return !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    } catch (e) { return false; }
+  }
   function showSave(blob, filename) {
+    _saveBlob = blob; _saveName = filename || 'photo.png';
+    // 画像は data URL にする（スマホの長押し「写真に追加」が確実に効く。blob URLだと出ないことがある）
+    blobToDataURL(blob).then(function (u) { const im = document.getElementById('save-img'); if (im) im.src = u; });
     if (_saveUrl) { try { URL.revokeObjectURL(_saveUrl); } catch (e) {} }
     _saveUrl = URL.createObjectURL(blob);
-    document.getElementById('save-img').src = _saveUrl;
     const dl = document.getElementById('save-dl');
-    dl.href = _saveUrl; dl.download = filename;
+    dl.href = _saveUrl; dl.download = _saveName;
+    const shareBtn = document.getElementById('save-share');
+    const canShare = canSharePhoto(blob, _saveName);   // iPhone/Android＝写真に追加が使える
     const inApp = isInAppBrowser();
-    // アプリ内ブラウザ：DLボタンは失敗しがち→隠して「長押し保存」＋「ブラウザで開く」案内
-    dl.style.display = inApp ? 'none' : 'block';
-    document.getElementById('save-inapp-note').style.display = inApp ? 'block' : 'none';
-    document.getElementById('save-hint').innerHTML = inApp
-      ? '下の画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺'
-      : '画像を<b>長押し</b>で保存、またはPCは下のボタンでダウンロードできます☺';
+    // スマホ：写真に追加ボタンを主役に。使えない環境(主にPC)はダウンロードボタン。
+    if (shareBtn) shareBtn.style.display = canShare ? 'block' : 'none';
+    dl.style.display = canShare ? 'none' : 'block';
+    // 共有もDLも不安なアプリ内ブラウザだけ「ブラウザで開く」案内を出す
+    document.getElementById('save-inapp-note').style.display = (inApp && !canShare) ? 'block' : 'none';
+    document.getElementById('save-hint').innerHTML = canShare
+      ? '下の<b>「写真に追加」</b>ボタンで保存できます☺（うまくいかない時は画像を長押し）'
+      : '画像を<b>長押し</b>して「“写真”に追加／画像を保存」を選んでね☺（PCは下のボタン）';
     document.getElementById('save-overlay').classList.add('show');
   }
+  window.doSharePhoto = async function () {
+    if (!_saveBlob) return;
+    const file = new File([_saveBlob], _saveName, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: '加工した写真' }); }
+      catch (e) { /* ユーザーがキャンセル/失敗した場合は何もしない（画像長押しでも保存できる） */ }
+    } else {
+      alert('画像を長押しして「“写真”に追加」を選んで保存してね');
+    }
+  };
   window.closeSaveOverlay = function() {
     document.getElementById('save-overlay').classList.remove('show');
   };

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>4日夏季講義｜まいにち1つずつ</title>
+<title>30日集中フォローアッププログラム｜まいにち1つずつ</title>
 <style>
   :root{
     /* ピンク主役パレット：背景=薄ピンクの暖色寄りグラデ、面=白、CTA/進捗/見出しアクセント=スモーキーピンク、ブルーは補助 */
@@ -620,7 +620,7 @@
   .hm-voice .vlbl .vdot{width:7px;height:7px;border-radius:50%;background:var(--pinkd);}
   .hm-voice audio{width:100%;height:36px;}
 
-  /* ===== サボり暗転：4日夏季講義画面ぜんぶをしっとり暗く（責めない・純赤NG） ===== */
+  /* ===== サボり暗転：30日プログラム画面ぜんぶをしっとり暗く（責めない・純赤NG） ===== */
   /* 画面ぜんぶをしっとり暗く：ビューポート固定のネイビー薄幕（クリックは透過、タブバーの上には出ない） */
   .home-dim-veil{position:fixed;left:50%;transform:translateX(-50%);top:0;bottom:56px;width:100%;max-width:480px;
     background:linear-gradient(180deg,rgba(28,38,54,.5),rgba(34,30,42,.44));pointer-events:none;z-index:15;display:none;}
@@ -877,7 +877,7 @@
       <div class="istep">
         <div class="no">3</div>
         <svg class="ic" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="isC" x1="0" y1="0" x2="40" y2="40"><stop offset="0" stop-color="#F5A6C8"/><stop offset="1" stop-color="#9FC8EC"/></linearGradient></defs><rect x="7" y="9" width="26" height="24" rx="5" fill="url(#isC)"/><path d="M7 15h26" stroke="#fff" stroke-width="2"/><path d="M13 6v6M27 6v6" stroke="url(#isC)" stroke-width="3" stroke-linecap="round"/><path d="M15 24l3.4 3.4L26 20" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-        <div class="bd"><div class="t">スタート日を決めてスタート</div><div class="s">はじめたい日を選ぶだけ。その日から4日夏季講義がスタートします。</div></div>
+        <div class="bd"><div class="t">スタート日を決めてスタート</div><div class="s">はじめたい日を選ぶだけ。その日から30日プログラムがスタートします。</div></div>
       </div>
       <div class="istep">
         <div class="no">4</div>
@@ -903,10 +903,10 @@
 </div>
 
 <div class="app">
-  <!-- サボり暗転：画面ぜんぶを覆うネイビー薄幕（4日夏季講義をサボった時だけ） -->
+  <!-- サボり暗転：画面ぜんぶを覆うネイビー薄幕（30日プログラムをサボった時だけ） -->
   <div class="home-dim-veil" id="homeDimVeil"></div>
   <div class="hud">
-    <div class="logo">4日夏季講義<small>Re:seller アシスタント</small></div>
+    <div class="logo">30日集中フォローアッププログラム<small>Re:seller アシスタント</small></div>
     <div class="tools">
       <button class="iconbtn howto-btn" onclick="openHowto()">使い方</button>
       <button class="iconbtn" onclick="exportJSON()">書出</button>
@@ -936,7 +936,7 @@
     <!-- 進捗 ◯/30 -->
     <div class="prog-wrap" id="homeProgWrap">
       <div class="prog-top">
-        <span class="pt-l">夏季講義のあゆみ</span>
+        <span class="pt-l">30日のあゆみ</span>
         <span class="pt-r"><b id="progDone">0</b> / 30日</span>
       </div>
       <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -1234,11 +1234,11 @@
     </div>
   </section>
 
-  <!-- ========== bottom tabs（4日夏季講義／出品サポート／記録／マイページ）========== -->
+  <!-- ========== bottom tabs（30日プログラム／出品サポート／記録／マイページ）========== -->
   <nav class="tabbar">
     <button class="on" data-p="home" onclick="go('home')">
       <img class="ic" src="assets/icons/tab1.png" alt="" width="28" height="28">
-      <span class="tl">4日夏季講義</span>
+      <span class="tl">30日プログラム</span>
     </button>
     <button data-p="box" onclick="go('box')">
       <img class="ic" src="assets/icons/tab2.png" alt="" width="28" height="28">
@@ -1430,7 +1430,7 @@
     <h2>診断結果</h2>
     <div id="diagResult"></div>
     <button class="btn pink" style="margin-top:6px" onclick="showRoutineFromResult()">あなた専用ルーティーンを見る</button>
-    <button class="close" onclick="closeDiagResult()">閉じて4日夏季講義をはじめる</button>
+    <button class="close" onclick="closeDiagResult()">閉じて30日プログラムをはじめる</button>
   </div>
 </div>
 
@@ -1454,7 +1454,7 @@
       </div>
       <div class="rt-goal-hint">30日間の目標出品数は およそ <b id="rt-30">30</b> 品です☺</div>
       <div class="rt-setup-row">
-        <div class="rsu-l"><span class="rsu-t">スタート日</span><span class="rsu-s">この日から4日夏季講義開始</span></div>
+        <div class="rsu-l"><span class="rsu-t">スタート日</span><span class="rsu-s">この日から30日プログラム開始</span></div>
         <input id="rt-start" type="date" class="rsu-date">
       </div>
     </div>
@@ -1463,7 +1463,7 @@
       <div class="field" style="margin-bottom:8px"><label>自由にメモ・書きかえOK（あなた仕様に）</label>
         <textarea id="rt-memo" placeholder="ここにメモを書けます"></textarea></div>
     </div>
-    <button class="btn navy" style="margin-top:6px" onclick="saveRoutine()">この内容で4日夏季講義をはじめる<span style="font-weight:600;font-size:11px;opacity:.85;margin-left:6px">▶</span></button>
+    <button class="btn navy" style="margin-top:6px" onclick="saveRoutine()">この内容で30日プログラムをはじめる<span style="font-weight:600;font-size:11px;opacity:.85;margin-left:6px">▶</span></button>
     <button class="close" onclick="closeModal('routineModal');renderHome()">あとで</button>
   </div>
 </div>
@@ -1580,7 +1580,7 @@ var MERCARI_API = "https://advctswaclrnrxpxiglw.supabase.co/functions/v1/mercari
 /* ============ storage ============ */
 var KEY = "seller_tool_v1";
 function defaultGame(){ return { xp:0, level:1, species:"egg", stage:"egg", streak:0, lastListDate:"", badges:[], todayDone:false, mood:"normal" }; }
-/* 4日夏季講義の既定：startDate は初回起動/専用URLで確定。cleared=クリア済みDay番号、submissions={day:提出テキスト}。 */
+/* 30日プログラムの既定：startDate は初回起動/専用URLで確定。cleared=クリア済みDay番号、submissions={day:提出テキスト}。 */
 function defaultProgram(){ return { startDate:"", cleared:[], points:0, badges:[], submissions:{} }; }
 var state = { items:[], goals:{}, profile:{}, sheet:{url:"",sheetId:"",enabled:false}, game:defaultGame(), diagnosis:null, routine:null, actlog:[], program:defaultProgram() };
 /* program オブジェクトの欠損を埋める（既存ユーザーが program を持たない場合も安全に） */
@@ -1644,7 +1644,7 @@ function num(v){ v=parseFloat(v); return isNaN(v)?0:v; }
 /* タブ⇔ページの対応。道具箱の中の在庫/売上/下書きに入ったときは「道具箱」タブを点灯 */
 var PAGE_TAB = { home:"home", box:"box", stock:"box", dash:"box", help:"box", mypage:"mypage", set:"set" };
 function go(p){
-  // 暗転の薄幕は「4日夏季講義」タブでだけ出す（他タブに移ったら消す）
+  // 暗転の薄幕は「30日プログラム」タブでだけ出す（他タブに移ったら消す）
   var _veil=document.getElementById("homeDimVeil"); if(_veil && p!=="home") _veil.classList.remove("show");
   document.querySelectorAll(".page").forEach(function(el){el.classList.remove("active");});
   document.getElementById("page-"+p).classList.add("active");
@@ -3487,7 +3487,7 @@ function finishDiagnosis(){
   state.routine = { type:r.type, steps:rt.steps.slice(), dailyTarget:rt.dailyTarget, memo:rt.memo||"" };
   // ★診断が終わると、そのタイプの卵が生まれる：相棒の見た目タイプを即反映
   if(state.game){ state.game.species=detectSpecies(); }
-  // ★4日夏季講義の起点は診断完了時に確定（診断→卵誕生→30日スタートの正しい順序）
+  // ★30日プログラムの起点は診断完了時に確定（診断→卵誕生→30日スタートの正しい順序）
   ensureProgramStart();
   // ★初回のみ：ホームに戻ったとき「卵が生まれた→30日スタート」の演出を1回だけ出す
   state._justDiagnosed = true;
@@ -3605,7 +3605,7 @@ function saveRoutine(){
   // 30日間の目標出品数を保存（プロフィールに保持）
   if(!state.profile) state.profile={};
   state.profile.targetListings = daily*30;
-  // スタート日を確定（選んだ日から4日夏季講義開始）
+  // スタート日を確定（選んだ日から30日プログラム開始）
   var sEl=document.getElementById("rt-start");
   ensureProgramStart();
   if(sEl && sEl.value){ state.program.startDate = sEl.value; }
@@ -3614,7 +3614,7 @@ function saveRoutine(){
   save();
   closeModal("routineModal");
   renderGame(); renderDash(); renderDiag(); renderHome();
-  toast("目標とスタート日を保存しました☺ 4日夏季講義開始！");
+  toast("目標とスタート日を保存しました☺ 30日プログラム開始！");
 }
 /* dailyTarget→今月の goals.listed（未設定のときだけ月換算で埋める。既存目標は上書きしない）。 */
 function applyRoutineToGoals(dailyTarget){
@@ -4154,7 +4154,7 @@ function openLineForReport(){
 }
 
 /* ============================================================
-   ★ 4日夏季講義（背骨）★
+   ★ 30日集中フォローアッププログラム（背骨）★
    30DAYSカリキュラムを物販フォローアップ版に再構成して埋め込み。
    進行：日付ベースで1日1解放。過去の未クリアは「あとから追いつける」。未来はロック。
    遅れても責めない穏当演出（純赤・警告語NG）。
@@ -4487,9 +4487,9 @@ function renderHome(){
   var elapsed = Math.max(0, daysBetween(p.startDate, today()));
   document.getElementById("homeHi").innerHTML =
     (nm? esc(nm)+"さん、こんにちは" : "こんにちは")+
-    "<small>4日夏季講義 "+(elapsed+1)+"日目・まいにち1つずつでOKです</small>";
+    "<small>30日集中フォローアッププログラム "+(elapsed+1)+"日目・まいにち1つずつでOKです</small>";
   renderHomeAutoSaveBadge();
-  // サボり暗転（2日以上サボり＝相棒sleepy）を4日夏季講義画面ぜんぶに適用
+  // サボり暗転（2日以上サボり＝相棒sleepy）を30日プログラム画面ぜんぶに適用
   var dim = !!(state.game && state.game.mood==="sleepy");
   var ph=document.getElementById("page-home"); if(ph) ph.classList.toggle("is-dim", dim);
   var veil=document.getElementById("homeDimVeil"); if(veil) veil.classList.toggle("show", dim);
@@ -4518,7 +4518,7 @@ function renderHomeWelcome(){
       '<div class="hw-art">'+buddySVG("egg", (g.species||"amiable"), "happy", 66)+'</div>'+
       '<div class="hw-body">'+
         '<div class="hw-ttl">'+esc(typeName)+'タイプの相棒（卵）が生まれました</div>'+
-        '<div class="hw-sub">きょうから4日夏季講義がはじまります。まずは今日の1つから☺</div>'+
+        '<div class="hw-sub">きょうから30日集中フォローアッププログラムがはじまります。まずは今日の1つから☺</div>'+
       '</div>'+
     '</div>';
   state._justDiagnosed = false; save();
@@ -4563,7 +4563,7 @@ function renderMissionCard(){
       // 30日そつぎょう
       el.innerHTML=
         '<div class="mission done-today">'+
-          '<div class="m-clear"><div class="mc-check">🎓</div><div class="mc-txt">4日夏季講義、ぜんぶ達成！<small>本当におつかれさまでした</small></div></div>'+
+          '<div class="m-clear"><div class="mc-check">🎓</div><div class="mc-txt">30日プログラム、ぜんぶ達成！<small>本当におつかれさまでした</small></div></div>'+
           '<div class="m-title" style="font-size:17px">つぎの3ヶ月も、あなたのペースで。</div>'+
           '<button class="m-cta" onclick="openCert()">🎓 修了証を受け取る</button>'+
           '<button class="m-cta sub" onclick="openMission('+PROGRAM_TOTAL+')">Day30をもう一度ひらく</button>'+
@@ -4653,7 +4653,7 @@ function copyProgramShare(){
   } else { fallbackCopy(txt); }
 }
 function openLineWithProgramShare(){ copyProgramShare(); setTimeout(function(){ window.open("https://line.me/R/","_blank"); }, 250); }
-/* バッジコレクション（4日夏季講義の11バッジ） */
+/* バッジコレクション（30日プログラムの11バッジ） */
 function renderHomeBadges(){
   var el=document.getElementById("homeBadges"); if(!el) return;
   var p=state.program||defaultProgram();
@@ -4825,7 +4825,7 @@ function showMissionCleared(def){
 }
 /* ミッション種別に応じた副作用：ミッションクリア→相棒XP（育成連動）、時間/行動系→行動ログ */
 function programSideEffects(def){
-  // ★4日夏季講義の進行そのものが相棒の育成につながる：
+  // ★30日プログラムの進行そのものが相棒の育成につながる：
   //   どのDayをクリアしても相棒にXPを1入れて段階的に育てる（出品実データが無くても達成感を返す）。
   //   さらに「ミッションを1つやる」＝サボり暗転からの再開なので mood を回復させる。
   gameOnMissionClear();
@@ -4992,12 +4992,21 @@ function chBadgeCells(kind){
 function renderChallengeBadges(){
   var host=document.getElementById("homeBadges"); if(!host) return;
   if(!CH_ON) return;
-  /* 参加者ビューでは30日プログラム由来の"/30日"進捗バーを隠し、あいさつをチャレンジ用に上書き（表記統一） */
+  /* ★スマセル用(?ch=1)だけの上書き。本番/モニター(CH_OFF)は元の「30日プログラム」表記のまま触らない。 */
   try{
+    // 30日プログラム由来の"/30日"進捗バーは隠す
     var pw=document.getElementById("homeProgWrap"); if(pw) pw.style.display="none";
+    // あいさつをスマセル用に
     var hi=document.getElementById("homeHi");
     if(hi){ var nm=(state.profile&&state.profile.name)?state.profile.name:"";
-      hi.innerHTML=(nm?esc(nm)+"さん、ようこそ":"ようこそ")+"<small>スマセル 4日夏季講義 ― まいにち1つずつでOKです☺</small>"; }
+      hi.innerHTML=(nm?esc(nm)+"さん、ようこそ":"ようこそ")+"<small>スマセル ― まいにち1つずつでOKです☺</small>"; }
+    // タブ名・ロゴを「スマセル」に（CH_ONのときだけ）
+    var tabHome=document.querySelector('.tabbar button[data-p="home"] .tl'); if(tabHome) tabHome.textContent="スマセル";
+    var logo=document.querySelector('.hud .logo'); if(logo) logo.innerHTML='スマセル<small>Re:seller アシスタント</small>';
+    // ★「いじらないと画面が暗くなる」サボり暗転演出をスマセル用ではOFFにする
+    var ph=document.getElementById("page-home"); if(ph) ph.classList.remove("is-dim");
+    var veil=document.getElementById("homeDimVeil"); if(veil) veil.classList.remove("show");
+    var dn=document.getElementById("homeDimNote"); if(dn) dn.innerHTML="";
   }catch(e){}
   host.style.display="";
   var kc=CH.days.filter(function(d){return chStateOf(d.n).k;}).length;
