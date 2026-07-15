@@ -4899,8 +4899,9 @@ function programSideEffects(def){
 //   → 本番/モニターの普通のURLは、過去に?ch=1を開いた端末でも必ず30日プログラム表示になる。
 var CH_ON = /[?&](ch=1|stamp=)/.test(location.search || "");
 try{ localStorage.removeItem("smasell_ch_on"); }catch(e){}   // 旧・記憶フラグが残っていたら掃除
-// 本番/モニター(スマセルでない)は「体験ツール」帯を消す（スマセルは体験/特典なので帯を残す）
-try{ if(!CH_ON && document.body) document.body.classList.add("no-trialbar"); }catch(e){}
+// 「体験ツール」帯は本番(reseller)のスマセルでない表示だけ消す。モニター(smasell-lp)とスマセル(?ch=1)は帯あり。
+var IS_PROD = location.pathname.indexOf("/reseller/") >= 0;
+try{ if(IS_PROD && !CH_ON && document.body) document.body.classList.add("no-trialbar"); }catch(e){}
 var CH = {
   title:"スマセル 夏の4日間チャレンジ",
   sub:"7/15（水）→ 7/18（土）｜毎晩21:00 ライブ",
