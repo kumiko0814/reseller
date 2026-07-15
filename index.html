@@ -851,6 +851,8 @@
   .lock-card .lock-ttl{font-weight:900;color:var(--navy);font-size:18px;line-height:1.5;margin-bottom:10px;}
   .lock-card .lock-sub{font-size:12.5px;color:var(--sub);font-weight:700;line-height:1.7;}
   .chLock{background:#f4f7fb;border:1px dashed #cdd9e6;border-radius:11px;padding:11px 12px;font-size:12.5px;font-weight:800;color:#5f97be;text-align:center;line-height:1.5;}
+  .box-tile.tile-locked{opacity:.5;filter:grayscale(.5);position:relative;}
+  .box-tile.tile-locked .bt-sub{color:#c98a5f !important;font-weight:800;}
 </style>
 </head>
 <body>
@@ -970,10 +972,10 @@
       <div class="th-tx">写真も、文章も、価格も。<small>この子がぜんぶおてつだいします☺</small></div>
     </div>
     <div class="box-grid">
-      <button type="button" class="box-tile blue" onclick="openPhotoTool()">
+      <button type="button" id="tilePhoto" class="box-tile blue" onclick="openGatedTool('photo')">
         <div class="bt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#5f97be" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 15l4-4 3 3 4-5 5 6"/><circle cx="9" cy="9" r="1.5"/></svg></div>
         <div class="bt-nm">写真をきれいに</div>
-        <div class="bt-sub">白ぬき・文字入れ（別タブ）</div>
+        <div class="bt-sub" id="tilePhotoSub">白ぬき・文字入れ（別タブ）</div>
       </button>
       <button type="button" class="box-tile" onclick="go('stock')">
         <div class="bt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#bd7886" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></div>
@@ -985,9 +987,9 @@
         <div class="bt-nm">売上を見る</div>
         <div class="bt-sub">目標と実績のグラフ</div>
       </button>
-      <button type="button" class="box-tile wide" onclick="go('help')">
+      <button type="button" id="tileOtasuke" class="box-tile wide" onclick="openGatedTool('otasuke')">
         <div class="bt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#bd7886" stroke-width="1.8"><path d="M12 3l1.9 5.6H20l-4.9 3.6 1.9 5.6L12 14.9 7 17.4l1.9-5.6L4 8.6h5.9z"/></svg></div>
-        <div style="flex:1"><div class="bt-nm">おたすけライト君</div><div class="bt-sub">商品名からタイトル・説明文の下書きを作る</div></div>
+        <div style="flex:1"><div class="bt-nm">おたすけライト君</div><div class="bt-sub" id="tileOtasukeSub">商品名からタイトル・説明文の下書きを作る</div></div>
       </button>
     </div>
     <div class="note">道具はいつでもここから。まずは「今日」のミッションを1つ終わらせるのが近道です。</div>
@@ -1683,6 +1685,20 @@ function applyBoxGate(){
       '<div class="lock-ttl">出品サポートは<br>'+chOpenAtLabel()+'から使えます</div>'+
       '<div class="lock-sub">写真の白ぬき・文字入れ・おたすけライト君などは、この時間になったらここに出てきます☺<br>もうすこしだけ待っていてね。</div>';
   }
+  // 出品サポートが開いている間、各ツールの時間窓をチェックしてタイルをロック表示（スマセルのみ）
+  if(!locked){
+    var chOn = (typeof CH_ON!=="undefined" && CH_ON);
+    gateTile("tilePhoto","tilePhotoSub", chOn ? chPhotoOpen() : true, "白ぬき・文字入れ（別タブ）",
+      (typeof chPhotoOpen==="function" && Date.now() < new Date(CH_PHOTO_FROM).getTime()) ? "🔒 7/15（水）20:00から" : "🔒 7/16（木）18:00まででした");
+    gateTile("tileOtasuke","tileOtasukeSub", chOn ? chOtasukeOpen() : true, "商品名からタイトル・説明文の下書きを作る",
+      (typeof chOtasukeOpen==="function" && Date.now() < new Date(CH_OTASUKE_FROM).getTime()) ? "🔒 7/16（木）18:00から" : "🔒 7/17（金）18:00まででした");
+  }
+}
+function gateTile(tileId, subId, isOpen, normalSub, lockedSub){
+  var tile=document.getElementById(tileId), sub=document.getElementById(subId);
+  if(!tile) return;
+  tile.classList.toggle("tile-locked", !isOpen);
+  if(sub) sub.innerHTML = isOpen ? normalSub : lockedSub;
 }
 
 /* ============ item modal ============ */
@@ -4899,10 +4915,24 @@ var CH = {
   ]
 };
 var CH_KEY="smasell_ch_v1";
-// ★出品サポート・課題提出が使えるようになる日時（JST絶対時刻。端末のタイムゾーンに依存せず判定）
-var CH_OPEN_AT="2026-07-15T19:00:00+09:00";
+// ★スマセル解禁（出品サポートページ全体・課題提出）＝今夜7/15 20:00（JST絶対時刻＝端末TZ非依存）
+var CH_OPEN_AT="2026-07-15T20:00:00+09:00";
 function chToolsOpen(){ try{ return Date.now() >= new Date(CH_OPEN_AT).getTime(); }catch(e){ return true; } }
-function chOpenAtLabel(){ return "7/15（水）19:00"; }
+function chOpenAtLabel(){ return "7/15（水）20:00"; }
+// ★各ツールの使える時間窓（スマセル?ch=1のときだけ有効。本番/モニターは常に使える）
+var CH_PHOTO_FROM="2026-07-15T20:00:00+09:00", CH_PHOTO_TO="2026-07-16T18:00:00+09:00";     // 写真加工：今夜20時〜明日16日18時
+var CH_OTASUKE_FROM="2026-07-16T18:00:00+09:00", CH_OTASUKE_TO="2026-07-17T18:00:00+09:00"; // おたすけ：16日18時〜17日18時
+function chWindowOpen(fromISO,toISO){ try{ var now=Date.now(); if(fromISO && now < new Date(fromISO).getTime()) return false; if(toISO && now >= new Date(toISO).getTime()) return false; return true; }catch(e){ return true; } }
+function chPhotoOpen(){ return chWindowOpen(CH_PHOTO_FROM, CH_PHOTO_TO); }
+function chOtasukeOpen(){ return chWindowOpen(CH_OTASUKE_FROM, CH_OTASUKE_TO); }
+function chPhotoMsg(){ return Date.now() < new Date(CH_PHOTO_FROM).getTime() ? "写真加工は 7/15（水）20:00 から使えます☺" : "写真加工が使えるのは 7/16（木）18:00 まででした。ありがとう☺"; }
+function chOtasukeMsg(){ return Date.now() < new Date(CH_OTASUKE_FROM).getTime() ? "おたすけライト君は 7/16（木）18:00 から使えます☺" : "おたすけライト君が使えるのは 7/17（金）18:00 まででした。ありがとう☺"; }
+// タイルのタップ時に時間窓をチェック（窓外なら案内して開かない）
+function openGatedTool(which){
+  var gated = (typeof CH_ON!=="undefined" && CH_ON);
+  if(which==="photo"){ if(gated && !chPhotoOpen()){ alert(chPhotoMsg()); return; } openPhotoTool(); }
+  else if(which==="otasuke"){ if(gated && !chOtasukeOpen()){ alert(chOtasukeMsg()); return; } go("help"); }
+}
 function chLoad(){ try{var r=localStorage.getItem(CH_KEY); if(r) return JSON.parse(r);}catch(e){} return {d:{}}; }
 function chSave(s){ try{localStorage.setItem(CH_KEY, JSON.stringify(s));}catch(e){} }
 function chNorm(x){ return (x||"").replace(/[\s　]/g,"").toLowerCase(); }
