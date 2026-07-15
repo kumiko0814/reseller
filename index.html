@@ -987,9 +987,10 @@
         <div class="bt-nm">売上を見る</div>
         <div class="bt-sub">目標と実績のグラフ</div>
       </button>
-      <button type="button" id="tileOtasuke" class="box-tile wide" onclick="openGatedTool('otasuke')">
+      <button type="button" id="tileOtasuke" class="box-tile" onclick="openGatedTool('otasuke')">
         <div class="bt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#bd7886" stroke-width="1.8"><path d="M12 3l1.9 5.6H20l-4.9 3.6 1.9 5.6L12 14.9 7 17.4l1.9-5.6L4 8.6h5.9z"/></svg></div>
-        <div style="flex:1"><div class="bt-nm">おたすけライト君</div><div class="bt-sub" id="tileOtasukeSub">商品名からタイトル・説明文の下書きを作る</div></div>
+        <div class="bt-nm">おたすけライト君</div>
+        <div class="bt-sub" id="tileOtasukeSub">タイトル・説明文の下書き</div>
       </button>
     </div>
     <div class="note">道具はいつでもここから。まずは「今日」のミッションを1つ終わらせるのが近道です。</div>
@@ -1690,7 +1691,7 @@ function applyBoxGate(){
     var chOn = (typeof CH_ON!=="undefined" && CH_ON);
     gateTile("tilePhoto","tilePhotoSub", chOn ? chPhotoOpen() : true, "白ぬき・文字入れ（別タブ）",
       (typeof chPhotoOpen==="function" && Date.now() < new Date(CH_PHOTO_FROM).getTime()) ? "🔒 7/15（水）20:00から" : "🔒 7/16（木）18:00まででした");
-    gateTile("tileOtasuke","tileOtasukeSub", chOn ? chOtasukeOpen() : true, "商品名からタイトル・説明文の下書きを作る",
+    gateTile("tileOtasuke","tileOtasukeSub", chOn ? chOtasukeOpen() : true, "タイトル・説明文の下書き",
       (typeof chOtasukeOpen==="function" && Date.now() < new Date(CH_OTASUKE_FROM).getTime()) ? "🔒 7/16（木）18:00から" : "🔒 7/17（金）18:00まででした");
   }
 }
