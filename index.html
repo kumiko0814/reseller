@@ -754,6 +754,11 @@
   body{padding-top:33px;}
   .hud{top:33px !important;}
   .intro-ov{padding-top:33px;}
+  /* 本番/モニター(?ch=1なし)は体験ツール帯を消す。スマセル(?ch=1)だけ帯あり */
+  body.no-trialbar{padding-top:0;}
+  body.no-trialbar .trial-bar{display:none;}
+  body.no-trialbar .hud{top:0 !important;}
+  body.no-trialbar .intro-ov{padding-top:0;}
 
   /* ==================== スマセル4日間チャレンジ・スタンプ帳 ==================== */
   .chWrap{margin:2px 0 16px;position:relative;}
@@ -4894,6 +4899,8 @@ function programSideEffects(def){
 //   → 本番/モニターの普通のURLは、過去に?ch=1を開いた端末でも必ず30日プログラム表示になる。
 var CH_ON = /[?&](ch=1|stamp=)/.test(location.search || "");
 try{ localStorage.removeItem("smasell_ch_on"); }catch(e){}   // 旧・記憶フラグが残っていたら掃除
+// 本番/モニター(スマセルでない)は「体験ツール」帯を消す（スマセルは体験/特典なので帯を残す）
+try{ if(!CH_ON && document.body) document.body.classList.add("no-trialbar"); }catch(e){}
 var CH = {
   title:"スマセル 夏の4日間チャレンジ",
   sub:"7/15（水）→ 7/18（土）｜毎晩21:00 ライブ",
