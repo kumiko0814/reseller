@@ -4948,7 +4948,21 @@ function chSave(s){ try{localStorage.setItem(CH_KEY, JSON.stringify(s));}catch(e
 function chNorm(x){ return (x||"").replace(/[\s　]/g,"").toLowerCase(); }
 function chToday(){ return (typeof nowDateStr==="function")? nowDateStr() : new Date().toISOString().slice(0,10); }
 function chStateOf(n){ var s=chLoad(); return s.d[n]||{k:false,s:false}; }
-function chSet(n,field,val){ var s=chLoad(); if(!s.d) s.d={}; if(!s.d[n]) s.d[n]={k:false,s:false}; s.d[n][field]=val; chSave(s); }
+function chSet(n,field,val){ var s=chLoad(); if(!s.d) s.d={}; if(!s.d[n]) s.d[n]={k:false,s:false}; s.d[n][field]=val; chSave(s); try{chSync();}catch(e){} }
+/* ★管理者ダッシュボード集計用：参加者の進捗をSupabaseにupsert（?ch=1のときだけ）。次回オープン時に既存進捗も同期される。 */
+var CH_SB={url:"https://inrvprlyobghviklulcv.supabase.co",key:"sb_publishable_ZrCNcsRHMci-l7Fns8QtIA_X22XZGJp",table:"smasell_participants"};
+function chDeviceId(){ try{ var id=localStorage.getItem("smasell_device_id"); if(!id){ id="d_"+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem("smasell_device_id",id);} return id; }catch(e){ return "d_anon"; } }
+function chSync(){ if(typeof CH_ON==="undefined"||!CH_ON) return; try{
+  var s=chLoad(); var g=function(n){ return (s.d&&s.d[n])?s.d[n]:{}; };
+  var nm=""; try{ var raw=localStorage.getItem("seller_tool_v1"); if(raw){ var pp=JSON.parse(raw); nm=(pp&&pp.profile&&pp.profile.name)?pp.profile.name:""; } }catch(e){}
+  var row={device_id:chDeviceId(),name:nm,
+    d1_k:!!g(1).k,d1_s:!!g(1).s,d2_k:!!g(2).k,d2_s:!!g(2).s,d3_k:!!g(3).k,d3_s:!!g(3).s,d4_k:!!g(4).k,d4_s:!!g(4).s,
+    updated_at:new Date().toISOString()};
+  fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?on_conflict=device_id",{method:"POST",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(row)}).catch(function(){});
+}catch(e){} }
+/* ★あいことばは「その日の24時(JST)」まで受付。過ぎたら入力不可（day.dateの翌日00:00 JSTが締切）。 */
+function chKwDeadline(day){ try{ return new Date(day.date+"T00:00:00+09:00").getTime()+86400000; }catch(e){ return Infinity; } }
+function chKwOpen(day){ try{ return Date.now() < chKwDeadline(day); }catch(e){ return true; } }
 /* 日付ロックは撤去（端末時計依存＝バグ源のため）。あいことばはライブでしか公開されないので、
    "知っている＝リアタイ参加"で実質ゲートされる。ツールは常に入力を受け付ける。 */
 function chUnlocked(day){ return true; }
@@ -4973,6 +4987,7 @@ function chSubmitKeyword(n){
   var v=chNorm(inp?inp.value:""); var msg=document.getElementById("chMsg"+n);
   if(!chUnlocked(day)){ if(msg) msg.innerHTML="<span class='chNg'>この日はまだ開いていません。"+chDateJp(day.date)+"（"+day.wday+"）よる9時にあけてね☺</span>"; return; }
   if(!v){ if(msg) msg.innerHTML="<span class='chNg'>ライブで発表される「あいことば」を入れてね</span>"; return; }
+  if(!chKwOpen(day)){ if(msg) msg.innerHTML="<span class='chNg'>この日のあいことばは受付終了しました（"+chDateJp(day.date)+" 24時まで）</span>"; return; }
   if(v===chNorm(day.kw)){
     chSet(n,"k",true); chCelebrate(); renderChallengeHero();
     var m2=document.getElementById("chMsg"+n); if(m2) m2.innerHTML="<span class='chOk'>スタンプ点灯♡ つづけてプロラインでプレゼントを受け取ってね</span>";
@@ -5033,9 +5048,12 @@ function renderChallengeHero(){
     var preStart = (t < CH.days[0].date);
     var kwBlock = st.k
       ? '<div class="chStep done"><span class="chChk">✓</span> リアタイ参加ずみ（あいことば受付）</div>'
-      : '<div class="chStep"><div class="chStepT">① ライブのあいことばを入れる<small>'+d.mins+'・ライブを見た人だけの合言葉</small></div>'+
-        '<div class="chKwRow"><input id="chKw'+d.n+'" class="chInp" placeholder="あいことばを入力" autocomplete="off"><button class="chBtn" onclick="chSubmitKeyword('+d.n+')">きめる</button></div>'+
-        '<div class="chMsg" id="chMsg'+d.n+'"></div></div>';
+      : (!chKwOpen(d)
+          ? '<div class="chStep"><div class="chStepT">① ライブのあいことばを入れる<small>'+d.mins+'・ライブを見た人だけの合言葉</small></div>'+
+            '<div class="chLock">⏰ この日のあいことばは受付終了しました（'+chDateJp(d.date)+' 24時まで）</div></div>'
+          : '<div class="chStep"><div class="chStepT">① ライブのあいことばを入れる<small>'+d.mins+'・ライブを見た人だけの合言葉</small></div>'+
+            '<div class="chKwRow"><input id="chKw'+d.n+'" class="chInp" placeholder="あいことばを入力" autocomplete="off"><button class="chBtn" onclick="chSubmitKeyword('+d.n+')">きめる</button></div>'+
+            '<div class="chMsg" id="chMsg'+d.n+'"></div></div>');
     var subBlock = st.s
       ? '<div class="chStep done"><span class="chChk">✓</span> オープンチャットに提出ずみ<a class="chUndo" onclick="chToggleSubmit('+d.n+')">とりけす</a></div>'
       : (!chToolsOpen()
@@ -5105,6 +5123,7 @@ function chConsumeLink(){
   try{ if(history.replaceState){ history.replaceState(null,"",location.pathname+"?ch=1"+location.hash); } }catch(e){}
 }
 chConsumeLink();
+try{ chSync(); }catch(e){}   // 起動時に既存の進捗も管理者集計へ同期（?ch=1のときだけ実行）
 
 /* renderHome のたびにスタンプ帳も描き直す（既存の挙動は完全に保持したまま追記） */
 if(typeof renderHome==="function"){ var __chOrigRH=renderHome; renderHome=function(){ var r=__chOrigRH.apply(this,arguments); try{ renderChallengeHero(); if(CH_LINK_HIT){ chCelebrate(); CH_LINK_HIT=null; } }catch(e){} return r; }; }

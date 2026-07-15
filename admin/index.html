@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スマセル 4日間チャレンジ｜管理者ダッシュボード</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "游ゴシック", "Yu Gothic", "YuGothic", sans-serif;
+      background: #eaf3f8;
+      color: #1a2a3a;
+      min-height: 100vh;
+    }
+
+    /* ── パスワードゲート ── */
+    #gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    #gate-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    #gate-card h1 {
+      font-size: 1.1rem;
+      color: #1a3455;
+      margin-bottom: 8px;
+    }
+    #gate-card p {
+      font-size: 0.82rem;
+      color: #888;
+      margin-bottom: 28px;
+    }
+    #gate-card input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid #c8d8e8;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #1a2a3a;
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color .2s;
+    }
+    #gate-card input[type="password"]:focus { border-color: #5b8abf; }
+    #gate-btn {
+      width: 100%;
+      padding: 12px;
+      background: #bd7886;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #gate-btn:hover { background: #a5647a; }
+    #gate-err {
+      color: #c0603f;
+      font-size: 0.82rem;
+      margin-top: 10px;
+      display: none;
+    }
+    #gate-note {
+      font-size: 0.75rem;
+      color: #bbb;
+      margin-top: 20px;
+    }
+
+    /* ── ダッシュボード本体 ── */
+    #dashboard { display: none; }
+
+    header {
+      background: #1a3455;
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
+    header .meta { font-size: 0.78rem; color: #a8c0d4; }
+
+    .main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+
+    /* 健全性カード */
+    #health-card {
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    #health-card.ok { background: #d4edda; border: 1.5px solid #a8d5b5; }
+    #health-card.err { background: #fdecea; border: 1.5px solid #e8b4a8; }
+    #health-card.loading { background: #f0f4f8; border: 1.5px solid #c8d8e8; }
+    #health-icon { font-size: 1.5rem; line-height: 1; }
+    #health-text { flex: 1; }
+    #health-title { font-weight: 700; font-size: 0.95rem; }
+    #health-sub { font-size: 0.82rem; margin-top: 4px; color: #555; }
+
+    /* SQL コピーブロック */
+    #sql-block {
+      display: none;
+      margin-top: 14px;
+      width: 100%;
+    }
+    #sql-block pre {
+      background: #1a2a3a;
+      color: #c8e6f8;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin-bottom: 10px;
+    }
+    #copy-sql-btn, #recheck-btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    #copy-sql-btn { background: #1a3455; color: #fff; }
+    #copy-sql-btn:hover { background: #254870; }
+    #recheck-btn { background: #bd7886; color: #fff; }
+    #recheck-btn:hover { background: #a5647a; }
+
+    /* サマリーカード */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .stat-card .label {
+      font-size: 0.72rem;
+      color: #5b8abf;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .stat-card .value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #1a3455;
+      line-height: 1;
+    }
+    .stat-card .rate {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* Day別グリッド */
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .day-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .day-card .day-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1a3455;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #eaf3f8;
+    }
+    .day-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+    .day-row .type { color: #555; }
+    .day-row .cnt { font-weight: 700; color: #1a3455; }
+    .day-row .pct {
+      font-size: 0.75rem;
+      color: #888;
+      margin-left: 4px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #eaf3f8;
+      border-radius: 3px;
+      margin-bottom: 4px;
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #5b8abf, #bd7886);
+      transition: width .6s ease;
+    }
+
+    /* テーブル */
+    .table-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .table-header h2 { font-size: 0.92rem; color: #1a3455; font-weight: 700; }
+    .table-meta { font-size: 0.78rem; color: #888; }
+    #refresh-btn {
+      padding: 8px 18px;
+      background: #5b8abf;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #refresh-btn:hover { background: #3d6fa0; }
+    #refresh-btn:disabled { background: #aac0d4; cursor: not-allowed; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    thead th {
+      background: #eaf3f8;
+      color: #1a3455;
+      font-weight: 700;
+      padding: 10px 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    thead th:first-child { text-align: left; padding-left: 14px; }
+    thead th:nth-child(2) { text-align: left; }
+    tbody tr {
+      border-bottom: 1px solid #f0f4f8;
+      transition: background .15s;
+    }
+    tbody tr:hover { background: #f5f9fc; }
+    tbody td {
+      padding: 9px 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    tbody td:first-child { text-align: left; padding-left: 14px; font-weight: 600; color: #1a3455; }
+    tbody td:nth-child(2) { text-align: left; color: #888; font-size: 0.75rem; font-family: monospace; }
+
+    .cell-pair { display: flex; justify-content: center; gap: 4px; }
+    .badge {
+      display: inline-block;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      line-height: 22px;
+      text-align: center;
+    }
+    .badge.done { background: #d4edda; color: #2d8547; }
+    .badge.none { background: #f0f4f8; color: #bbb; }
+
+    .ts { font-size: 0.72rem; color: #999; }
+
+    #empty-row td { text-align: center; color: #aaa; padding: 30px; }
+
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .table-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── パスワードゲート ── -->
+<div id="gate">
+  <div id="gate-card">
+    <h1>管理者ダッシュボード</h1>
+    <p>スマセル 4日間チャレンジ</p>
+    <input type="password" id="pw-input" placeholder="パスワードを入力" autocomplete="current-password">
+    <button id="gate-btn">ログイン</button>
+    <div id="gate-err">パスワードが違います</div>
+    <p id="gate-note">※ クライアントサイド認証のみ。本格的なセキュリティではありません。</p>
+  </div>
+</div>
+
+<!-- ── ダッシュボード本体 ── -->
+<div id="dashboard">
+  <header>
+    <h1>スマセル 4日間チャレンジ｜管理者ダッシュボード</h1>
+    <span class="meta" id="last-updated">読み込み中...</span>
+  </header>
+
+  <div class="main">
+
+    <!-- 健全性カード -->
+    <div id="health-card" class="loading">
+      <span id="health-icon">⏳</span>
+      <div id="health-text">
+        <div id="health-title">接続確認中...</div>
+        <div id="health-sub">Supabase に接続しています</div>
+      </div>
+      <div id="sql-block">
+        <pre id="sql-pre"></pre>
+        <button id="copy-sql-btn" onclick="copySQL()">SQLをコピー</button>
+        <button id="recheck-btn" onclick="loadData()">再チェック</button>
+      </div>
+    </div>
+
+    <!-- サマリーカード -->
+    <div class="summary-grid">
+      <div class="stat-card">
+        <div class="label">総参加者</div>
+        <div class="value" id="total-count">—</div>
+        <div class="rate">登録済み</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">完走者</div>
+        <div class="value" id="finisher-count">—</div>
+        <div class="rate" id="finisher-rate">全Day 🌙✅完了</div>
+      </div>
+    </div>
+
+    <!-- Day別カード -->
+    <div class="day-grid" id="day-grid">
+      <!-- JS で生成 -->
+    </div>
+
+    <!-- 参加者テーブル -->
+    <div class="table-section">
+      <div class="table-header">
+        <h2>参加者一覧</h2>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span class="table-meta" id="table-meta">— 件</span>
+          <button id="refresh-btn" onclick="loadData()">更新</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>名前</th>
+            <th>ID</th>
+            <th>Day1<br><small>🌙/✅</small></th>
+            <th>Day2<br><small>🌙/✅</small></th>
+            <th>Day3<br><small>🌙/✅</small></th>
+            <th>Day4<br><small>🌙/✅</small></th>
+            <th>最終更新</th>
+          </tr>
+        </thead>
+        <tbody id="participants-body">
+          <tr id="empty-row"><td colspan="7">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script>
+  // ── 設定 ──
+  const SUPABASE_URL = 'https://inrvprlyobghviklulcv.supabase.co';
+  const ANON_KEY     = 'sb_publishable_ZrCNcsRHMci-l7Fns8QtIA_X22XZGJp';
+  const PASSWORD     = 'merone2026';
+
+  const CREATE_SQL = `create table if not exists public.smasell_participants (
+  device_id text primary key,
+  name text,
+  d1_k boolean default false, d1_s boolean default false,
+  d2_k boolean default false, d2_s boolean default false,
+  d3_k boolean default false, d3_s boolean default false,
+  d4_k boolean default false, d4_s boolean default false,
+  first_seen timestamptz default now(),
+  updated_at timestamptz default now()
+);
+alter table public.smasell_participants enable row level security;
+create policy "anon read"   on public.smasell_participants for select using (true);
+create policy "anon insert" on public.smasell_participants for insert with check (true);
+create policy "anon update" on public.smasell_participants for update using (true) with check (true);`;
+
+  // ── パスワードゲート ──
+  const pwInput = document.getElementById('pw-input');
+  const gateBtn = document.getElementById('gate-btn');
+  const gateErr = document.getElementById('gate-err');
+
+  function tryLogin() {
+    if (pwInput.value === PASSWORD) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      loadData();
+    } else {
+      gateErr.style.display = 'block';
+      pwInput.value = '';
+      pwInput.focus();
+    }
+  }
+
+  gateBtn.addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+  // ── データ取得 ──
+  async function loadData() {
+    setHealth('loading', '⏳', '接続確認中...', 'Supabase に接続しています');
+    document.getElementById('refresh-btn').disabled = true;
+    document.getElementById('sql-block').style.display = 'none';
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/smasell_participants?select=*&order=updated_at.desc`,
+        {
+          headers: {
+            'apikey': ANON_KEY,
+            'Authorization': `Bearer ${ANON_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // 404 やテーブル未作成の場合
+      if (res.status === 404) {
+        showTableMissing('テーブルが存在しません (404)');
+        return;
+      }
+
+      const data = await res.json();
+
+      // Supabase REST はエラー時も 200 ではなく error オブジェクトを返すことがある
+      if (!Array.isArray(data)) {
+        const msg = data?.message || data?.error || JSON.stringify(data);
+        if (msg.includes('relation') || msg.includes('does not exist') || msg.includes('42P01')) {
+          showTableMissing('テーブル未作成: ' + msg);
+        } else {
+          showError('エラー: ' + msg);
+        }
+        return;
+      }
+
+      // 正常
+      setHealth('ok', '✅', `接続OK・${data.length}件`, `smasell_participants テーブル`);
+      renderDashboard(data);
+
+    } catch (e) {
+      showError('ネットワークエラー: ' + e.message);
+    } finally {
+      document.getElementById('refresh-btn').disabled = false;
+    }
+  }
+
+  // ── 健全性カード制御 ──
+  function setHealth(type, icon, title, sub) {
+    const card = document.getElementById('health-card');
+    card.className = type; // ok / err / loading
+    document.getElementById('health-icon').textContent = icon;
+    document.getElementById('health-title').textContent = title;
+    document.getElementById('health-sub').textContent = sub;
+  }
+
+  function showTableMissing(reason) {
+    setHealth('err', '🔴', 'テーブル未作成です。Supabase の SQL Editor で下記を実行してください', reason);
+    document.getElementById('sql-pre').textContent = CREATE_SQL;
+    document.getElementById('sql-block').style.display = 'block';
+    clearTable('テーブルが存在しないため表示できません');
+  }
+
+  function showError(msg) {
+    setHealth('err', '⚠️', '接続に失敗しました', msg);
+    clearTable('データ取得に失敗しました');
+  }
+
+  function clearTable(msg) {
+    document.getElementById('participants-body').innerHTML =
+      `<tr id="empty-row"><td colspan="7">${msg}</td></tr>`;
+    document.getElementById('table-meta').textContent = '— 件';
+    document.getElementById('total-count').textContent = '—';
+    document.getElementById('finisher-count').textContent = '—';
+    document.getElementById('finisher-rate').textContent = '全Day 🌙✅完了';
+    document.getElementById('day-grid').innerHTML = '';
+  }
+
+  function copySQL() {
+    navigator.clipboard.writeText(CREATE_SQL).then(() => {
+      const btn = document.getElementById('copy-sql-btn');
+      btn.textContent = 'コピーしました！';
+      setTimeout(() => { btn.textContent = 'SQLをコピー'; }, 2000);
+    });
+  }
+
+  // ── ダッシュボード描画 ──
+  function pct(n, total) {
+    if (!total) return '—';
+    return Math.round(n / total * 100) + '%';
+  }
+
+  function renderDashboard(rows) {
+    const total = rows.length;
+
+    // 完走者
+    const finishers = rows.filter(r =>
+      r.d1_k && r.d1_s && r.d2_k && r.d2_s &&
+      r.d3_k && r.d3_s && r.d4_k && r.d4_s
+    ).length;
+
+    document.getElementById('total-count').textContent = total;
+    document.getElementById('finisher-count').textContent = finishers;
+    document.getElementById('finisher-rate').textContent =
+      total ? `${pct(finishers, total)} 完走率` : '全Day 🌙✅完了';
+
+    // Day別カード
+    const dayGrid = document.getElementById('day-grid');
+    dayGrid.innerHTML = '';
+    for (let d = 1; d <= 4; d++) {
+      const kKey = `d${d}_k`;
+      const sKey = `d${d}_s`;
+      const kCount = rows.filter(r => r[kKey]).length;
+      const sCount = rows.filter(r => r[sKey]).length;
+      const kPct = total ? Math.round(kCount / total * 100) : 0;
+      const sPct = total ? Math.round(sCount / total * 100) : 0;
+
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.innerHTML = `
+        <div class="day-label">Day ${d}</div>
+        <div class="day-row">
+          <span class="type">🌙 リアタイ参加</span>
+          <span>
+            <span class="cnt">${total ? kCount : '—'}</span>
+            <span class="pct">/ ${total ? total + '人 (' + kPct + '%)' : '—'}</span>
+          </span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:${kPct}%"></div></div>
+        <div class="day-row" style="margin-top:6px">
+          <span class="type">✅ 課題提出</span>
+          <span>
+            <span class="cnt">${total ? sCount : '—'}</span>
+            <span class="pct">/ ${total ? total + '人 (' + sPct + '%)' : '—'}</span>
+          </span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:${sPct}%;background:linear-gradient(90deg,#bd7886,#d4a0af)"></div></div>
+      `;
+      dayGrid.appendChild(card);
+    }
+
+    // 参加者テーブル
+    const tbody = document.getElementById('participants-body');
+    if (total === 0) {
+      tbody.innerHTML = '<tr id="empty-row"><td colspan="7">まだ参加者がいません</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(r => {
+        const name = r.name || '(未設定)';
+        const shortId = (r.device_id || '').slice(0, 6);
+        const days = [1,2,3,4].map(d => {
+          const k = r[`d${d}_k`];
+          const s = r[`d${d}_s`];
+          return `<td>
+            <div class="cell-pair">
+              <span class="badge ${k ? 'done' : 'none'}">${k ? '🌙' : '·'}</span>
+              <span class="badge ${s ? 'done' : 'none'}">${s ? '✅' : '·'}</span>
+            </div>
+          </td>`;
+        }).join('');
+        const ts = r.updated_at ? formatDate(r.updated_at) : '—';
+        return `<tr>
+          <td>${escHtml(name)}</td>
+          <td>${escHtml(shortId)}</td>
+          ${days}
+          <td class="ts">${ts}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('table-meta').textContent = `${total} 件`;
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      `最終更新: ${now.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}`;
+  }
+
+  // ── ユーティリティ ──
+  function formatDate(isoStr) {
+    try {
+      const d = new Date(isoStr);
+      const now = new Date();
+      const diff = now - d; // ms
+      if (diff < 60000) return 'たった今';
+      if (diff < 3600000) return Math.floor(diff / 60000) + '分前';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + '時間前';
+      // 2日以上前は日付
+      return d.toLocaleString('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+        month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+    } catch { return '—'; }
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
