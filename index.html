@@ -4899,6 +4899,11 @@ function programSideEffects(def){
 //   → 本番/モニターの普通のURLは、過去に?ch=1を開いた端末でも必ず30日プログラム表示になる。
 var CH_ON = /[?&](ch=1|stamp=)/.test(location.search || "");
 try{ localStorage.removeItem("smasell_ch_on"); }catch(e){}   // 旧・記憶フラグが残っていたら掃除
+// ★練習リセット：?reset=1 でチャレンジのスタンプ/あいことば履歴を消して最初から（?reset=all で診断ごと全消し）
+try{
+  if(/[?&]reset=all/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); localStorage.removeItem("seller_tool_v1"); if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
+  else if(/[?&]reset=1/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
+}catch(e){}
 // 「体験ツール」帯は本番(reseller)のスマセルでない表示だけ消す。モニター(smasell-lp)とスマセル(?ch=1)は帯あり。
 var IS_PROD = location.pathname.indexOf("/reseller/") >= 0;
 try{ if(IS_PROD && !CH_ON && document.body) document.body.classList.add("no-trialbar"); }catch(e){}
