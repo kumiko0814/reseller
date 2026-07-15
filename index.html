@@ -4890,14 +4890,10 @@ function programSideEffects(def){
    「リアタイを見た人だけ入れられる」を、日付ゲート（当日以降のみ有効）でも二重に守っています。 */
 /* ★チャレンジは既定OFF＝一般の販売用ツール(プレーンURL)には出ない。
    参加者専用リンク ?ch=1 か、あいことばリンク ?stamp=◯◯ で来た端末だけONにし、以後も記憶して表示。?ch=0で解除。 */
-var CH_ON = (function(){
-  var q = location.search || "";
-  try{
-    if(/[?&]ch=0/.test(q)){ localStorage.removeItem("smasell_ch_on"); return false; }
-    if(/[?&](ch=1|stamp=)/.test(q)){ localStorage.setItem("smasell_ch_on","1"); return true; }
-    return localStorage.getItem("smasell_ch_on")==="1";
-  }catch(e){ return /[?&](ch=1|stamp=)/.test(q); }
-})();
+// ★スマセル表示は「URLに ?ch=1（または ?stamp=）が付いている時だけ」。記憶(localStorage)はしない。
+//   → 本番/モニターの普通のURLは、過去に?ch=1を開いた端末でも必ず30日プログラム表示になる。
+var CH_ON = /[?&](ch=1|stamp=)/.test(location.search || "");
+try{ localStorage.removeItem("smasell_ch_on"); }catch(e){}   // 旧・記憶フラグが残っていたら掃除
 var CH = {
   title:"スマセル 夏の4日間チャレンジ",
   sub:"7/15（水）→ 7/18（土）｜毎晩21:00 ライブ",
@@ -5092,8 +5088,8 @@ function chConsumeLink(){
   var code; try{ code=chNorm(decodeURIComponent(m[1])); }catch(e){ code=chNorm(m[1]); }
   if(!code) return;
   CH.days.forEach(function(d){ if(chNorm(d.kw)===code && chUnlocked(d)){ chSet(d.n,"k",true); CH_LINK_HIT=d.n; } });
-  // URLからstampを消す（再読込での再発火・共有事故を防ぐ。履歴汚染なし）
-  try{ if(history.replaceState){ var q=(location.search||"").replace(/([?&])stamp=[^&]*(&|$)/,"$1").replace(/[?&]$/,""); history.replaceState(null,"",location.pathname+q+location.hash); } }catch(e){}
+  // URLからstampを消しつつ ?ch=1 を保持（再読込・共有事故を防ぎ、参加者はスマセル表示のままにする）
+  try{ if(history.replaceState){ history.replaceState(null,"",location.pathname+"?ch=1"+location.hash); } }catch(e){}
 }
 chConsumeLink();
 
