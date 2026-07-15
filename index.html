@@ -4901,8 +4901,8 @@ var CH_ON = /[?&](ch=1|stamp=)/.test(location.search || "");
 try{ localStorage.removeItem("smasell_ch_on"); }catch(e){}   // 旧・記憶フラグが残っていたら掃除
 // ★練習リセット：?reset=1 でチャレンジのスタンプ/あいことば履歴を消して最初から（?reset=all で診断ごと全消し）
 try{
-  if(/[?&]reset=all/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); localStorage.removeItem("seller_tool_v1"); if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
-  else if(/[?&]reset=1/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
+  if(/[?&]reset=all/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); localStorage.removeItem("seller_tool_v1"); window.__chSkipRestore=true; if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
+  else if(/[?&]reset=1/.test(location.search)){ localStorage.removeItem("smasell_ch_v1"); window.__chSkipRestore=true; if(history.replaceState) history.replaceState(null,"",location.pathname+"?ch=1"); }
 }catch(e){}
 // 「体験ツール」帯は本番(reseller)のスマセルでない表示だけ消す。モニター(smasell-lp)とスマセル(?ch=1)は帯あり。
 var IS_PROD = location.pathname.indexOf("/reseller/") >= 0;
@@ -4951,7 +4951,48 @@ function chStateOf(n){ var s=chLoad(); return s.d[n]||{k:false,s:false}; }
 function chSet(n,field,val){ var s=chLoad(); if(!s.d) s.d={}; if(!s.d[n]) s.d[n]={k:false,s:false}; s.d[n][field]=val; chSave(s); try{chSync();}catch(e){} }
 /* ★管理者ダッシュボード集計用：参加者の進捗をSupabaseにupsert（?ch=1のときだけ）。次回オープン時に既存進捗も同期される。 */
 var CH_SB={url:"https://inrvprlyobghviklulcv.supabase.co",key:"sb_publishable_ZrCNcsRHMci-l7Fns8QtIA_X22XZGJp",table:"smasell_participants"};
-function chDeviceId(){ try{ var id=localStorage.getItem("smasell_device_id"); if(!id){ id="d_"+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem("smasell_device_id",id);} return id; }catch(e){ return "d_anon"; } }
+function chCookieGet(k){ try{ var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)")); return m?decodeURIComponent(m[1]):""; }catch(e){ return ""; } }
+function chCookieSet(k,v){ try{ document.cookie=k+"="+encodeURIComponent(v)+";path=/;max-age="+(60*60*24*400)+";SameSite=Lax"; }catch(e){} }
+/* 端末IDは localStorage と cookie の両方に保存。LINE内ブラウザでlocalStorageが消えても
+   cookieが残れば同じIDでサーバーから復元できる（スタンプが消えない）。 */
+function chDeviceId(){
+  try{
+    var id=""; try{ id=localStorage.getItem("smasell_device_id")||""; }catch(e){}
+    if(!id) id=chCookieGet("smasell_device_id");
+    if(!id) id="d_"+Math.random().toString(36).slice(2)+Date.now().toString(36);
+    try{ localStorage.setItem("smasell_device_id",id); }catch(e){}
+    chCookieSet("smasell_device_id",id);
+    return id;
+  }catch(e){ return "d_anon"; }
+}
+/* 開いた時にサーバー(Supabase)から進捗を取得し、ローカルとunion（スタンプは絶対に消さない）→保存→再描画→サーバーへ再同期。
+   これでlocalStorageが揮発しても、cookieのIDが残っていればスタンプが復活する。 */
+function chRestore(){
+  if(typeof CH_ON==="undefined"||!CH_ON) return;
+  if(window.__chSkipRestore){ try{chSync();}catch(e){} return; }
+  try{
+    var id=chDeviceId();
+    fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?device_id=eq."+encodeURIComponent(id)+"&select=*",{headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key}})
+    .then(function(r){ return r.ok? r.json() : []; })
+    .then(function(rows){
+      var srv=(rows&&rows[0])?rows[0]:null;
+      if(srv){
+        var s=chLoad(); if(!s.d) s.d={};
+        for(var n=1;n<=4;n++){
+          if(!s.d[n]) s.d[n]={k:false,s:false};
+          if(srv["d"+n+"_k"]) s.d[n].k=true;   // union：サーバーがtrueなら必ずtrue（消さない）
+          if(srv["d"+n+"_s"]) s.d[n].s=true;
+        }
+        chSave(s);
+        try{ if(typeof renderChallengeHero==="function") renderChallengeHero(); }catch(e){}
+      }
+      try{ chSync(); }catch(e){}   // union後の状態をサーバーへ（局所が空でもサーバー値は消えない）
+    })
+    .catch(function(){ try{ chSync(); }catch(e){} });
+  }catch(e){ try{ chSync(); }catch(_){} }
+}
+/* リセット時はサーバー行も消す（消さないと復元で戻ってしまう） */
+function chDeleteServer(){ try{ var id=chDeviceId(); fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?device_id=eq."+encodeURIComponent(id),{method:"DELETE",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key}}).catch(function(){}); }catch(e){} }
 function chSync(){ if(typeof CH_ON==="undefined"||!CH_ON) return; try{
   var s=chLoad(); var g=function(n){ return (s.d&&s.d[n])?s.d[n]:{}; };
   var nm=""; try{ var raw=localStorage.getItem("seller_tool_v1"); if(raw){ var pp=JSON.parse(raw); nm=(pp&&pp.profile&&pp.profile.name)?pp.profile.name:""; } }catch(e){}
@@ -5123,7 +5164,7 @@ function chConsumeLink(){
   try{ if(history.replaceState){ history.replaceState(null,"",location.pathname+"?ch=1"+location.hash); } }catch(e){}
 }
 chConsumeLink();
-try{ chSync(); }catch(e){}   // 起動時に既存の進捗も管理者集計へ同期（?ch=1のときだけ実行）
+try{ chRestore(); }catch(e){}   // 起動時：サーバーから復元(union)＋同期（LINE内ブラウザの保存揮発対策）
 
 /* renderHome のたびにスタンプ帳も描き直す（既存の挙動は完全に保持したまま追記） */
 if(typeof renderHome==="function"){ var __chOrigRH=renderHome; renderHome=function(){ var r=__chOrigRH.apply(this,arguments); try{ renderChallengeHero(); if(CH_LINK_HIT){ chCelebrate(); CH_LINK_HIT=null; } }catch(e){} return r; }; }
