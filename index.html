@@ -764,6 +764,12 @@
   .chWrap{margin:2px 0 16px;position:relative;}
   .chInapp{background:#fff7ed;border:1px solid #f0c98a;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:11.5px;font-weight:700;color:#8a5a00;line-height:1.6;}
   .chInapp b{color:#8a5a00;}
+  .chName{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:12px;}
+  .chName.empty{border-color:#f0c98a;background:#fffdf8;box-shadow:0 0 0 3px rgba(240,201,138,.18);}
+  .chNameL{font-size:12px;font-weight:900;color:var(--navy);margin-bottom:7px;}
+  .chNameL small{font-weight:700;color:var(--sub);font-size:10.5px;margin-left:6px;}
+  .chNameRow{display:flex;gap:7px;}
+  .chNameMsg{min-height:14px;margin-top:6px;font-size:11px;font-weight:800;line-height:1.4;}
   .chCard{background:linear-gradient(162deg,#ffffff 0%,#fdf2f6 48%,#eef1fb 100%);border:1px solid var(--line);
     border-radius:22px;padding:16px 15px 18px;box-shadow:0 12px 34px rgba(189,120,134,.16);position:relative;overflow:hidden;}
   .chCard::before{content:"";position:absolute;top:-46px;right:-34px;width:140px;height:140px;border-radius:50%;
@@ -4956,6 +4962,17 @@ var CH_SB={url:"https://inrvprlyobghviklulcv.supabase.co",key:"sb_publishable_Zr
 function chCookieGet(k){ try{ var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)")); return m?decodeURIComponent(m[1]):""; }catch(e){ return ""; } }
 function chCookieSet(k,v){ try{ document.cookie=k+"="+encodeURIComponent(v)+";path=/;max-age="+(60*60*24*400)+";SameSite=Lax"; }catch(e){} }
 function chIsInApp(){ try{ return /Line\/|FBAN|FBAV|Instagram|Twitter|Micromessenger|KAKAOTALK|NAVER/i.test(navigator.userAgent||""); }catch(e){ return false; } }
+/* スタンプ帳の「お名前」保存：プロフィール(localStorage)＋cookie＋サーバー同期。管理者画面に名前が並ぶ＆名前復元が効く。 */
+function chSaveName(){
+  var inp=document.getElementById("chNameInput"); if(!inp) return;
+  var nm=(inp.value||"").replace(/^\s+|\s+$/g,"");
+  try{ var raw=localStorage.getItem("seller_tool_v1"); var p=raw?JSON.parse(raw):{}; if(!p.profile) p.profile={}; p.profile.name=nm; localStorage.setItem("seller_tool_v1",JSON.stringify(p)); }catch(e){}
+  try{ if(typeof state!=="undefined"&&state){ if(!state.profile) state.profile={}; state.profile.name=nm; } }catch(e){}
+  if(nm) chCookieSet("smasell_name",nm);
+  try{ chSync(); }catch(e){}
+  var msg=document.getElementById("chNameMsg");
+  if(msg) msg.innerHTML = nm ? "<span class='chOk'>保存しました♡ ありがとう</span>" : "<span class='chNg' style='color:#c98a5f'>お名前を入れてね</span>";
+}
 /* 端末IDは localStorage と cookie の両方に保存。LINE内ブラウザでlocalStorageが消えても
    cookieが残れば同じIDでサーバーから復元できる（スタンプが消えない）。 */
 function chDeviceId(){
@@ -5118,7 +5135,12 @@ function renderChallengeHero(){
   var inappNote = chIsInApp()
     ? '<div class="chInapp">📱 LINEの中で開いています。<b>スタンプが消える場合は、右下(または右上)のメニュー →「Chrome / Safariで開く」</b>で開くと確実に保存されます☺</div>'
     : '';
-  host.innerHTML='<div class="chWrap">'+inappNote+'<div class="chCard">'+head+body+'</div></div>';
+  var _nm = chCurrentName();
+  var nameBlock = '<div class="chName'+(_nm?'':' empty')+'">'+
+    '<div class="chNameL">お名前<small>賞の確認・記録に使います</small></div>'+
+    '<div class="chNameRow"><input id="chNameInput" class="chInp" value="'+esc(_nm)+'" placeholder="例：山田花子" autocomplete="off"><button class="chBtn" onclick="chSaveName()">保存</button></div>'+
+    '<div class="chNameMsg" id="chNameMsg">'+(_nm?'':'<span class="chNg" style="color:#c98a5f">↑ お名前を入れてね（未入力です）</span>')+'</div></div>';
+  host.innerHTML='<div class="chWrap">'+inappNote+'<div class="chCard">'+nameBlock+head+body+'</div></div>';
   renderChallengeBadges();
 }
 /* ホーム下部のバッジ欄を「リアタイ参加4＋課題提出4＝計8バッジ」のコレクションに差し替え（?ch=1のときのみ） */
