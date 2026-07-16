@@ -2401,8 +2401,11 @@ function buildDraft(inp){
   /* ===== タイトル・説明文・タグ：売れてる出品者5人の勝ちパターン適用（2026-07-11） ===== */
   var badge = gradeBadge(cond);                                  // 状態バッジ（美品✨/新品未使用）
   var brandDisp = keBrand? keBrand.disp.replace(/\s*\/\s*/," ") : brand; // 和英ブランド名
-  // タイトル：[状態バッジ]+[商品名]+[特徴] を先頭に。検索キーワードを詰める・40字
-  var title = [badge, name, opt].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
+  // タイトル：[状態バッジ][ブランド][商品名][色・サイズ]（例：美品 ケイトスペード ウィンドブレーカー フード付き ブルゾン ブラック 150）・40字
+  var tBrand = "";
+  if(brand && name.toLowerCase().indexOf(brand.toLowerCase())<0){ tBrand = brandDisp || brand; }  // 商品名にブランドが無ければ自動で入れる
+  var tBadge = (badge||"").replace(/✨/g,"");   // タイトルでは絵文字を外す（40字枠を節約し「150→15」のような欠けを防ぐ）
+  var title = [tBadge, tBrand, name, opt].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
   if(title.length>40) title=title.slice(0,40);
   // 説明文：■見出し構造（ブランド/アイテム＋検索語/採寸/状態/発送）＋正直な状態＋回遊
   var kw = keywordLine(brandDisp, keCat, opt, name);
@@ -2411,7 +2414,6 @@ function buildDraft(inp){
     : "目立つ大きな傷や汚れはなく、綺麗な状態です。まだまだ気持ちよくお使いいただけます。";
   var usedNote = /新品|未使用/.test(cond) ? "" : "・自宅保管のUSED品にご理解いただける方のみご購入をお願いいたします\n";
   var desc =
-    "ご覧いただきありがとうございます☺\n即購入OK・お値下げはコメントでご相談ください。\n\n"+
     "■ブランド\n"+(brandDisp||"ノーブランド")+"\n\n"+
     "■アイテム\n"+[name,opt,keCat].filter(Boolean).join(" ")+(kw?("\n"+kw):"")+"\n\n"+
     "■商品情報（※コピー後にご記入ください）\n"+
@@ -2425,6 +2427,7 @@ function buildDraft(inp){
     "■状態\n"+cond+"。"+condHonest+"\n\n"+
     "■発送・その他\n"+
     "・送料無料／即購入OK\n"+
+    "・お値下げはコメントでご相談ください\n"+
     "・ご購入後1〜2日以内に、丁寧に梱包して発送します\n"+
     usedNote+
     "\n気になる点はお気軽にコメントください☺";
