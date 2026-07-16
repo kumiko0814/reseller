@@ -762,8 +762,11 @@
 
   /* ==================== スマセル4日間チャレンジ・スタンプ帳 ==================== */
   .chWrap{margin:2px 0 16px;position:relative;}
-  .chInapp{background:#fff7ed;border:1px solid #f0c98a;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:11.5px;font-weight:700;color:#8a5a00;line-height:1.6;}
+  .chInapp{background:#fff4e6;border:1.5px solid #e8a24c;border-radius:14px;padding:13px 14px;margin-bottom:12px;font-size:12.5px;font-weight:700;color:#8a5a00;line-height:1.7;box-shadow:0 4px 14px rgba(232,162,76,.18);}
   .chInapp b{color:#8a5a00;}
+  .chInappTtl{font-size:14px;font-weight:900;color:#a5560a;margin-bottom:5px;}
+  .chInappBtn{display:block;text-align:center;text-decoration:none;margin-top:11px;background:#06C755;color:#fff;font-weight:900;font-size:14px;padding:12px;border-radius:12px;box-shadow:0 6px 16px rgba(6,199,85,.3);}
+  .chInappHint{margin-top:9px;background:#fff;border:1px dashed #e8c9a0;border-radius:10px;padding:9px 11px;font-size:11.5px;color:#8a5a00;line-height:1.6;}
   .chName{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:12px;}
   .chName.empty{border-color:#f0c98a;background:#fffdf8;box-shadow:0 0 0 3px rgba(240,201,138,.18);}
   .chNameL{font-size:12px;font-weight:900;color:var(--navy);margin-bottom:7px;}
@@ -5134,9 +5137,18 @@ function renderChallengeHero(){
       '<div class="chGift">🎁 <b>あいことば</b>をプロラインに送ると、その日だけのプレゼントが届きます♡<small>「きめる」を押すとプロラインが開きます</small></div>'+
     '</div>';
   }
-  var inappNote = chIsInApp()
-    ? '<div class="chInapp">📱 LINEの中で開いています。<b>スタンプが消える場合は、右下(または右上)のメニュー →「Chrome / Safariで開く」</b>で開くと確実に保存されます☺</div>'
-    : '';
+  var inappNote = '';
+  if(chIsInApp()){
+    var _android = /Android/i.test(navigator.userAgent||"");
+    var _intent = 'intent://'+location.host+location.pathname+'?ch=1#Intent;scheme=https;package=com.android.chrome;end';
+    inappNote = '<div class="chInapp">'+
+      '<div class="chInappTtl">⚠️ 今LINEの中で開いています</div>'+
+      'このままだと、<b>スタンプや名前の記録が消えてしまうことがあります</b>。<br><b>Chrome / Safari で開くと、消えずに使えます☺</b>'+
+      (_android
+        ? '<a class="chInappBtn" href="'+_intent+'">🌐 Chromeで開く（おすすめ）</a>'
+        : '<div class="chInappHint">iPhoneの方：画面下（または右上）の<b>共有ボタン</b>→「<b>Safariで開く</b>」を選んでね</div>')+
+    '</div>';
+  }
   var _nm = chCurrentName();
   var nameBlock = '<div class="chName'+(_nm?'':' empty')+'">'+
     '<div class="chNameL">お名前<small>賞の確認・記録に使います</small></div>'+
