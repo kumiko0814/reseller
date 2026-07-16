@@ -638,6 +638,12 @@
         </div>
       </div>
 
+      <!-- 背景：白 or 透過（既定=白。メルカリで黒くならない） -->
+      <label id="whitebg-row" style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px;cursor:pointer;">
+        <input type="checkbox" id="white-bg-toggle" checked onchange="try{renderPreview();}catch(e){}" style="width:20px;height:20px;flex:none;accent-color:var(--accent);">
+        <span style="font-size:13.5px;font-weight:800;color:var(--navy);line-height:1.5;">背景を白にする<small style="display:block;font-weight:600;color:var(--sub);font-size:11px;">メルカリ向け・おすすめ（チェックを外すと透過。透過は保存先によっては黒く見えます）</small></span>
+      </label>
+
       <!-- 仕上げ調整セクション（透過を常に保つため非表示。影/明るさは白背景化するため今回は使わない） -->
       <div class="finish-section" style="display:none;">
         <div class="finish-section-header" id="finish-header" onclick="toggleFinishSection()">
@@ -1051,8 +1057,9 @@
     const originalName = selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'result';
 
     if (!hasFinish) {
-      // 仕上げなし → 透過PNGを保存（長押し保存オーバーレイ）
-      showSave(resultBlob, originalName + '_bg-removed.png');
+      // 仕上げなし → 白背景トグルON=白に焼き込んで保存／OFF=透過のまま
+      if (chWhiteBg()) { flattenOnWhite(resultBlob).then(function(b){ showSave(b, originalName + '_shiro.png'); }); }
+      else { showSave(resultBlob, originalName + '_bg-removed.png'); }
     } else {
       // 仕上げあり → Canvas経由で保存
       const img = new Image();
@@ -1375,12 +1382,28 @@
     });
   }
 
-  // baseComposed(商品) + 文字 を新しい透過キャンバスに合成して返す
+  // 背景を白にするか（トグル。既定ON＝メルカリで黒くならない）
+  function chWhiteBg(){ var el=document.getElementById('white-bg-toggle'); return el? !!el.checked : true; }
+  // 透過blobを白背景に焼き込んで返す
+  function flattenOnWhite(blob){
+    return new Promise(function(resolve){
+      try{
+        var img=new Image(); var url=URL.createObjectURL(blob);
+        img.onload=function(){ URL.revokeObjectURL(url);
+          var c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+          var x=c.getContext('2d'); x.fillStyle='#ffffff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0);
+          c.toBlob(function(b){ resolve(b||blob); },'image/png'); };
+        img.onerror=function(){ resolve(blob); }; img.src=url;
+      }catch(e){ resolve(blob); }
+    });
+  }
+  // baseComposed(商品) + 文字 を合成して返す（白背景トグルON＝白／OFF＝透過）
   function composeLabeled() {
     const W = baseComposed.width, H = baseComposed.height;
     const out = document.createElement('canvas');
     out.width = W; out.height = H;
     const octx = out.getContext('2d');
+    if (chWhiteBg()) { octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, W, H); }  // 白背景（メルカリ向け）
     octx.drawImage(baseComposed, 0, 0);
     const labels = getLabelValues();
     drawText(octx, W, H, labels.lines);
@@ -1394,11 +1417,15 @@
     const pc = document.getElementById('label-canvas');
     pc.width = composed.width; pc.height = composed.height;
     const ctx = pc.getContext('2d');
-    const cs = Math.max(10, Math.round(composed.width / 40));
-    for (let y = 0; y < pc.height; y += cs) {
-      for (let x = 0; x < pc.width; x += cs) {
-        ctx.fillStyle = ((((x / cs) | 0) + ((y / cs) | 0)) % 2) ? '#eceaf1' : '#ffffff';
-        ctx.fillRect(x, y, cs, cs);
+    if (chWhiteBg()) {
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pc.width, pc.height);   // プレビューも白＝保存物と同じ見た目
+    } else {
+      const cs = Math.max(10, Math.round(composed.width / 40));
+      for (let y = 0; y < pc.height; y += cs) {
+        for (let x = 0; x < pc.width; x += cs) {
+          ctx.fillStyle = ((((x / cs) | 0) + ((y / cs) | 0)) % 2) ? '#eceaf1' : '#ffffff';
+          ctx.fillRect(x, y, cs, cs);
+        }
       }
     }
     ctx.drawImage(composed, 0, 0);
