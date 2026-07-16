@@ -867,6 +867,37 @@
     throw new Error('ライブラリの読み込みに失敗しました。ネットワーク接続を確認してください。');
   }
 
+  // ★白抜き後のアルファ整形：半透明(白く透ける)を不透明に固める。ほぼ透明はしっかり透過。
+  //   軽量モデルが生地の一部を半透明に判定して「白っぽくなる」問題への対策。
+  function cleanAlpha(blob) {
+    return new Promise(function (resolve) {
+      try {
+        const img = new Image();
+        const url = URL.createObjectURL(blob);
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth; c.height = img.naturalHeight;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          try {
+            const d = ctx.getImageData(0, 0, c.width, c.height);
+            const a = d.data;
+            for (let i = 3; i < a.length; i += 4) {
+              const v = a[i];
+              if (v < 24) a[i] = 0;          // ほぼ透明 → 完全に透明（背景をきれいに）
+              else if (v < 252) a[i] = 255;  // 半透明 → 不透明（白っぽく透けるのを防ぐ）
+            }
+            ctx.putImageData(d, 0, 0);
+          } catch (e) {}
+          c.toBlob(function (b) { resolve(b || blob); }, 'image/png');
+        };
+        img.onerror = function () { resolve(blob); };
+        img.src = url;
+      } catch (e) { resolve(blob); }
+    });
+  }
+
   // グローバルに公開（onclickから呼べるよう）
   window.startProcessing = async function() {
     if (!selectedFile) return;
@@ -901,7 +932,8 @@
 
       setProgress(95, '仕上げ処理中...', 'もうすぐ完了します');
 
-      resultBlob = resultBlobData;
+      // ★半透明で「白っぽく透ける」のを防ぐ：中間アルファを不透明に固める後処理
+      resultBlob = await cleanAlpha(resultBlobData);
       baseComposed = null;   // 新しい結果になったら商品配置キャッシュを作り直す
       localStorage.setItem('photo_models_cached', 'true');
 
