@@ -4528,7 +4528,9 @@ function renderHome(){
       (nm? esc(nm)+"さん、ようこそ" : "ようこそ")+
       "<small>まずは1分の診断から。ここからはじまります</small>";
     renderHomeAutoSaveBadge();
-    renderHomeDiagFirst();
+    // ★スマセル参加者(?ch=1)は診断を強制しない（毎回キャラ質問が出る問題を回避）。チャレンジのスタンプ帳だけ使えればOK。
+    if(typeof CH_ON!=="undefined" && CH_ON){ var _df=document.getElementById("homeDiagFirst"); if(_df) _df.innerHTML=""; }
+    else { renderHomeDiagFirst(); }
     return;
   }
   // 診断済み：診断ファーストカードは消し、通常のホームを描画
@@ -5217,7 +5219,7 @@ if(isLinkExpired()){
 } else {
   load(); applyLinkParams(); ensureProgramStart(); gameDailyCheck(); loadProfile(); loadSheetSettings(); renderHome(); renderItems(); renderDash(); renderGame(); renderDiag();
   /* 初回（診断まだ＆説明書を見ていない）だけ、説明書を主役表示 */
-  if(!state.diagnosis && !state.introSeen){ showIntro(); }
+  if(!state.diagnosis && !state.introSeen && !(typeof CH_ON!=="undefined" && CH_ON)){ showIntro(); }
 }
 </script>
 </body>
