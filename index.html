@@ -5230,10 +5230,13 @@ function hideIntro(){ var el=document.getElementById("introScreen"); if(el) el.c
 function startFromIntro(){ try{ state.introSeen=true; save(); }catch(e){} hideIntro(); startDiagnosis(); }
 function openIntroAgain(){ showIntro(); }
 
-/* ===== 体験リンクの有効期限（2026-07-18まで有効、7/19以降は終了画面） ===== */
-var LINK_EXPIRY="2026-07-18";
+/* ===== 体験リンクの有効期限 =====
+   ・本番ツール（/reseller/ の通常表示）は期限で止めない＝常に表示
+   ・体験／スマセル配布リンクだけ期限を見る（現在は先まで延長して閲覧可） */
+var LINK_EXPIRY="2027-12-31";
 function nowDateStr(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
-function isLinkExpired(){ return nowDateStr() > LINK_EXPIRY; }
+var IS_REAL_PROD = (typeof IS_PROD!=="undefined" && IS_PROD) && !(typeof CH_ON!=="undefined" && CH_ON);
+function isLinkExpired(){ return !IS_REAL_PROD && (nowDateStr() > LINK_EXPIRY); }
 
 if(isLinkExpired()){
   // 期限切れ：アプリは起動せず、終了画面だけ表示
