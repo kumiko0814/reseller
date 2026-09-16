@@ -173,6 +173,8 @@
   .tabbar button .tl{font-size:9.5px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;}
   .tabbar button.on{color:var(--pinkd);}
   .tabbar button.on .ic{transform:translateY(-1px) scale(1.08);opacity:1;filter:drop-shadow(0 2px 5px rgba(189,120,134,.4));}
+  .tabbar button svg.ic{color:var(--sub);}
+  .tabbar button.on svg.ic{color:var(--pinkd);}
   .tabbar button.on::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
     width:24px;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,#F5A6C8,#B98BEA);}
   /* 診断前などアイコンをそっと沈める（未診断のグレーアウトは使わない） */
@@ -582,7 +584,7 @@
   .intro-ov.show{display:block;}
   .intro-wrap{max-width:480px;margin:0 auto;padding:40px 24px 44px;min-height:100%;}
   .intro-hero{text-align:center;margin-bottom:24px;}
-  .intro-fly{width:92px;height:92px;margin:0 auto 12px;display:block;filter:drop-shadow(0 8px 18px rgba(201,155,232,.38));}
+  .intro-fly{width:184px;height:auto;margin:0 auto 14px;display:block;}
   .intro-eyebrow{font-size:12px;font-weight:800;color:var(--pinkd);letter-spacing:.16em;margin-bottom:8px;}
   .intro-ttl{font-size:25px;font-weight:800;color:var(--navy);line-height:1.36;letter-spacing:.01em;}
   .intro-ttl b{background:linear-gradient(90deg,#e07aaa,#9B5DE5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -656,6 +658,7 @@
   .tab-hero{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,#fdf0f5,#f3edfa);
     border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin:2px 2px 16px;}
   .tab-hero .th-ic{width:48px;height:48px;flex:none;filter:drop-shadow(0 4px 8px rgba(201,155,232,.28));}
+  .tab-hero .th-logo{width:88px;height:auto;filter:none;}
   .tab-hero .th-tx{font-size:12.5px;font-weight:800;color:var(--navy);line-height:1.55;}
   .tab-hero .th-tx small{display:block;font-size:11px;font-weight:700;color:var(--sub);margin-top:2px;}
 
@@ -895,7 +898,7 @@
 <div class="intro-ov" id="introScreen">
   <div class="intro-wrap">
     <div class="intro-hero">
-      <svg class="intro-fly" viewBox="0 0 96 96" fill="none"><defs><linearGradient id="flyG" x1="0" y1="0" x2="96" y2="96"><stop offset="0" stop-color="#F5A6C8"/><stop offset=".5" stop-color="#C99BE8"/><stop offset="1" stop-color="#8FC0EC"/></linearGradient></defs><path d="M48 82c-1.4-12-9.4-20-21.4-22C15 58 10 51 13.4 43.5c3-6.7 11-8.7 17-4.4C34.6 42 44 47.6 48 59c4-11.4 13.4-17 17.6-19.9 6-4.3 14-2.3 17 4.4C89 51 84 58 72.4 60c-12 2-20 10-21.4 22z" fill="url(#flyG)"/><circle cx="48" cy="24" r="7.4" fill="url(#flyG)"/><circle cx="44.5" cy="22.5" r="1.7" fill="#fff" opacity=".85"/></svg>
+      <img class="intro-fly" src="assets/reche-logo-transparent.png" alt="Re:che">
       <div class="intro-eyebrow">Re:seller アシスタント</div>
       <h1 class="intro-ttl">30日で、<b>出品が習慣</b>になる<br>あなただけの相棒アプリ</h1>
       <p class="intro-lead">ひとりだと続かない出品も、この子と一緒なら大丈夫。<br>1分の診断からはじめて、まいにち1つずつ。<br>気づけば、出品があたりまえになっています☺</p>
@@ -910,7 +913,7 @@
       </div>
       <div class="istep">
         <div class="no">2</div>
-        <svg class="ic" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="isH" x1="0" y1="0" x2="40" y2="40"><stop offset="0" stop-color="#F7B7A0"/><stop offset="1" stop-color="#E79BC0"/></linearGradient></defs><path d="M20 32c-.5-4-3.1-6.6-7-7.2-3.5-.6-5-3-4-5.6 1-2.2 3.6-2.8 5.6-1.4C16 19 19 21 20 24c1-3 4-5 5.4-6.2 2-1.4 4.6-.8 5.6 1.4 1 2.6-.5 5-4 5.6-3.9.6-6.5 3.2-7 7.2z" fill="url(#isH)"/></svg>
+        <svg class="ic" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="isH" x1="0" y1="0" x2="40" y2="40"><stop offset="0" stop-color="#F7B7A0"/><stop offset="1" stop-color="#E79BC0"/></linearGradient></defs><circle cx="20" cy="20" r="13" stroke="url(#isH)" stroke-width="3.5"/><circle cx="20" cy="20" r="5" fill="url(#isH)"/></svg>
         <div class="bd"><div class="t">専用ルーティン＆目標を決める</div><div class="s">あなたに合った続けやすい出品ペースと、30日間の目標出品数を設定します。</div></div>
       </div>
       <div class="istep">
@@ -999,7 +1002,7 @@
     <div class="sec-title">出品サポート<small>使いたいときに開く</small></div>
     <div id="boxLockNote" class="lock-card" style="display:none"></div>
     <div class="tab-hero">
-      <svg class="th-ic" viewBox="0 0 48 48" fill="none"><defs><linearGradient id="crownG" x1="0" y1="0" x2="48" y2="48"><stop offset="0" stop-color="#F5A6C8"/><stop offset=".5" stop-color="#C99BE8"/><stop offset="1" stop-color="#8FC0EC"/></linearGradient></defs><path d="M8 34l-3-16 9 6 10-14 10 14 9-6-3 16z" fill="url(#crownG)"/><rect x="8" y="34" width="32" height="6" rx="3" fill="url(#crownG)"/><circle cx="24" cy="10" r="3" fill="url(#crownG)"/><circle cx="5" cy="18" r="2.4" fill="url(#crownG)"/><circle cx="43" cy="18" r="2.4" fill="url(#crownG)"/></svg>
+      <img class="th-ic th-logo" src="assets/reche-logo-transparent.png" alt="Re:che">
       <div class="th-tx">写真も、文章も、価格も。<small>この子がぜんぶおてつだいします☺</small></div>
     </div>
     <div class="box-grid">
@@ -1206,7 +1209,7 @@
   <section class="page" id="page-mypage">
     <div class="sec-title">記録<small>きろく・カレンダー・週報月報</small></div>
     <div class="tab-hero">
-      <svg class="th-ic" viewBox="0 0 48 48" fill="none"><defs><linearGradient id="recG" x1="0" y1="0" x2="48" y2="48"><stop offset="0" stop-color="#F7B7A0"/><stop offset=".55" stop-color="#E79BC0"/><stop offset="1" stop-color="#B98BEA"/></linearGradient></defs><path d="M24 40c-.7-6-4.8-10-11-11-5.5-.9-8-4.8-6.4-9 1.6-4 6-4.6 9.4-1.8C18 20.5 22 24 24 29c2-5 6-8.5 8-10.6 3.4-2.8 7.8-2.2 9.4 1.8 1.6 4.2-.9 8.1-6.4 9-6.2 1-10.3 5-11 11z" fill="url(#recG)"/><path d="M18 26l3.6 3.6L30 21" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <svg class="th-ic" viewBox="0 0 48 48" fill="none"><defs><linearGradient id="recG" x1="0" y1="0" x2="48" y2="48"><stop offset="0" stop-color="#F7B7A0"/><stop offset=".55" stop-color="#E79BC0"/><stop offset="1" stop-color="#B98BEA"/></linearGradient></defs><circle cx="24" cy="24" r="18" stroke="url(#recG)" stroke-width="4"/><path d="M15.5 25l6 6 11.5-13" stroke="url(#recG)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="th-tx">がんばりは、ぜんぶ残ります。<small>きろくが増えるほど、相棒も育ちます🌱</small></div>
     </div>
 
@@ -1278,19 +1281,19 @@
   <!-- ========== bottom tabs（30日プログラム／出品サポート／記録／マイページ）========== -->
   <nav class="tabbar">
     <button class="on" data-p="home" onclick="go('home')">
-      <img class="ic" src="assets/icons/tab1.png" alt="" width="28" height="28">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
       <span class="tl">30日プログラム</span>
     </button>
     <button data-p="box" onclick="go('box')">
-      <img class="ic" src="assets/icons/tab2.png" alt="" width="28" height="28">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/></svg>
       <span class="tl">出品サポート</span>
     </button>
     <button data-p="mypage" onclick="go('mypage')">
-      <img class="ic" src="assets/icons/tab3.png" alt="" width="28" height="28">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
       <span class="tl">記録</span>
     </button>
     <button data-p="set" onclick="go('set')">
-      <img class="ic" src="assets/icons/tab4.png" alt="" width="28" height="28">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span class="tl">マイページ</span>
     </button>
   </nav>
@@ -1667,7 +1670,8 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
 /* ============ helpers ============ */
 function yen(n){ if(n===null||n===undefined||isNaN(n)) n=0; var s=Math.round(n).toLocaleString("ja-JP"); return (n<0?"-¥"+s.replace("-",""):"¥"+s); }
 function pct(n){ if(!isFinite(n)||isNaN(n)) return "0%"; return Math.round(n)+"%"; }
-function today(){ var d=new Date(); return d.toISOString().slice(0,10); }
+function ymdLocal(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function today(){ return ymdLocal(new Date()); }
 function ymOf(dateStr){ return dateStr? dateStr.slice(0,7):""; }
 function daysBetween(a,b){ return Math.floor((new Date(b)-new Date(a))/86400000); }
 function esc(s){ return (s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
@@ -1899,7 +1903,7 @@ function shiftMonth(d){
   if(m<1){m=12;y--;} if(m>12){m=1;y++;}
   curMonth = y+"-"+String(m).padStart(2,"0"); renderDash();
 }
-/* ベンチマーク：生徒の平均販売率35%・利益率42%(美里さん仕入れ実績) */
+/* ベンチマーク：生徒の平均販売率35%・利益率42%(先輩の仕入れ実績) */
 var BENCH_RATE = 35, BENCH_PROFITRATE = 42;
 function aggMonth(ym){
   var listed=0, soldN=0, sales=0, profit=0, listAmt=0;
@@ -2021,7 +2025,7 @@ function goalPreview(){
       html += "<br>→ 目標 "+listed+"品なら <b>1日 "+(Math.round(perDayN*10)/10)+"品</b>／1品の平均単価は <b>"+yen(Math.round(needUnit))+"</b> が目安";
     }
     html += "<div style='font-size:10.5px;color:var(--sub);margin-top:6px'>"+
-      (a.soldN>0?"あなたの実績":"基準")+"販売率 "+Math.round(rate)+"%・利益率 "+Math.round(pr)+"% で計算（美里さん実績ベース）</div>";
+      (a.soldN>0?"あなたの実績":"基準")+"販売率 "+Math.round(rate)+"%・利益率 "+Math.round(pr)+"% で計算（先輩の実績ベース）</div>";
   } else {
     html = "目標利益（＋目標出品数）を入れると、1日あたりの出品目安と必要な平均単価が出ます☺";
   }
@@ -4039,11 +4043,11 @@ function mondayOf(dateStr){
   var day = d.getDay(); // 0=日
   var diff = (day===0? -6 : 1-day);
   d.setDate(d.getDate()+diff);
-  return d.toISOString().slice(0,10);
+  return ymdLocal(d);
 }
 function addDays(dateStr, n){
   var d = new Date(dateStr+"T00:00:00"); d.setDate(d.getDate()+n);
-  return d.toISOString().slice(0,10);
+  return ymdLocal(d);
 }
 /* オフセット週の月曜 */
 function activeWeekMonday(){ return addDays(mondayOf(today()), actWeekOffset*7); }
