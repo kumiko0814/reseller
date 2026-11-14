@@ -5010,7 +5010,7 @@ function chDeviceId(){
 function chCurrentName(){ var nm=""; try{ var raw=localStorage.getItem("seller_tool_v1"); if(raw){ var pp=JSON.parse(raw); nm=(pp&&pp.profile&&pp.profile.name)?pp.profile.name:""; } }catch(e){} if(!nm) nm=chCookieGet("smasell_name"); return nm||""; }
 /* サーバー行をローカルにunion適用（スタンプを絶対に減らさない）＋再描画 */
 function chApplySrv(srv){ if(!srv) return; var s=chLoad(); if(!s.d) s.d={}; for(var n=1;n<=4;n++){ if(!s.d[n]) s.d[n]={k:false,s:false}; if(srv["d"+n+"_k"]) s.d[n].k=true; if(srv["d"+n+"_s"]) s.d[n].s=true; } chSave(s); try{ if(typeof renderChallengeHero==="function") renderChallengeHero(); }catch(e){} }
-function chSbGet(q){ return fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?"+q,{headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key}}).then(function(r){ return r.ok? r.json() : []; }); }
+function chSbGet(q){ return fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?"+q,{headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key,"x-member-id":chDeviceId()}}).then(function(r){ return r.ok? r.json() : []; }); }
 function chRestore(){
   if(typeof CH_ON==="undefined"||!CH_ON) return;
   if(window.__chSkipRestore){ try{chSync();}catch(e){} return; }
@@ -5032,14 +5032,14 @@ function chRestore(){
   }catch(e){ try{ chSync(); }catch(_){} }
 }
 /* リセット時はサーバー行も消す（消さないと復元で戻ってしまう） */
-function chDeleteServer(){ try{ var id=chDeviceId(); fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?device_id=eq."+encodeURIComponent(id),{method:"DELETE",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key}}).catch(function(){}); }catch(e){} }
+function chDeleteServer(){ try{ var id=chDeviceId(); fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?device_id=eq."+encodeURIComponent(id),{method:"DELETE",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key,"x-member-id":chDeviceId()}}).catch(function(){}); }catch(e){} }
 function chSync(){ if(typeof CH_ON==="undefined"||!CH_ON) return; try{
   var s=chLoad(); var g=function(n){ return (s.d&&s.d[n])?s.d[n]:{}; };
   var nm=chCurrentName(); if(nm) chCookieSet("smasell_name",nm);   // 名前もcookieに保持（復元キーの保険）
   var row={device_id:chDeviceId(),name:nm,
     d1_k:!!g(1).k,d1_s:!!g(1).s,d2_k:!!g(2).k,d2_s:!!g(2).s,d3_k:!!g(3).k,d3_s:!!g(3).s,d4_k:!!g(4).k,d4_s:!!g(4).s,
     updated_at:new Date().toISOString()};
-  fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?on_conflict=device_id",{method:"POST",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(row)}).catch(function(){});
+  fetch(CH_SB.url+"/rest/v1/"+CH_SB.table+"?on_conflict=device_id",{method:"POST",headers:{"apikey":CH_SB.key,"Authorization":"Bearer "+CH_SB.key,"x-member-id":chDeviceId(),"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(row)}).catch(function(){});
 }catch(e){} }
 /* ★あいことばは「その日の24時(JST)」まで受付。過ぎたら入力不可（day.dateの翌日00:00 JSTが締切）。 */
 function chKwDeadline(day){ try{ return new Date(day.date+"T00:00:00+09:00").getTime()+86400000; }catch(e){ return Infinity; } }
